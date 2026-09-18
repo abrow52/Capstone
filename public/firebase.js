@@ -1,5 +1,6 @@
+ //configuration of db
+ //DON'T MODIFY!!!
  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";
   import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -15,22 +16,4 @@
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const db = getFirestore(app);
-
-const snapshot = await getDocs(collection(db, "userInfo"));
-const userDiv = document.getElementById("test");
-
-snapshot.forEach((doc) => {
-
-    const user = doc.data();
-
-    userDiv.innerHTML += `
-        <div>
-            <h2>${user.Name}</h2>
-            <p>Title: ${user.Title}</p>
-            <p>User ID: ${user.UserID}</p>
-        </div>
-    `;
-
-});
+  export const db = getFirestore(app);
