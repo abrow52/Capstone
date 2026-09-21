@@ -1,4 +1,5 @@
 Schedule Genie
+
 An application for easy scheduling
 - Create weekly schedules
 - Approve requests
