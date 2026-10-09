@@ -22,3 +22,38 @@ snapshot.forEach((doc) => {
     `;
 
 });
+
+const loginForm = document.getElementById("login");
+// const error = document.getElementById("error");
+
+
+loginForm.addEventListener("submit", async (event) => {
+
+     event.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    let loggedIn = false;
+
+    snapshot.forEach((doc) => {
+
+        const user = doc.data();
+
+        if (user.Username == username && user.Password == password) {
+
+            loggedIn = true;
+
+            console.log("Login successful!");
+            console.log("Welcome", user.Name);
+
+            window.location.href = "index.html";
+        }
+
+    });
+
+    // if (!loggedIn) {
+    //     error.textContent = "Incorrect username or password.";
+    // }
+
+});
