@@ -1,4 +1,7 @@
-//this is where we are going to put all the code to grab from the database
+//login JS
+
+
+
 import {db} from "./firebase.js";
 import {collection, getDocs, getDoc} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 // import {getAuth} from "./firebase.js/auth";
@@ -34,7 +37,8 @@ loginForm.addEventListener("submit", async (event) => {
                 if(user.Password === password){
                     loggedIn = true;
                     error.style.display = "none";
-                    console.log("Welcome", user.Name);
+                    sessionStorage.setItem("userID", email.id);
+                    sessionStorage.setItem("Name", user.Name);
                     window.location.href = "index.html";
                     return;
                 }
