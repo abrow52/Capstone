@@ -6,8 +6,9 @@ import {db} from "./firebase.js";
 import {collection, getDocs, getDoc} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 // import {getAuth} from "./firebase.js/auth";
 
-
-
+//add log out functionality and add 
+// sessionStorage.clear();
+// window.location.href = "login.html";
 
 //login func
 const userInfodb = await getDocs(collection(db, "userInfo"));
@@ -37,7 +38,7 @@ loginForm.addEventListener("submit", async (event) => {
                 if(user.Password === password){
                     loggedIn = true;
                     error.style.display = "none";
-                    sessionStorage.setItem("userID", email.id);
+                    sessionStorage.setItem("userID", email.id.id);
                     sessionStorage.setItem("Name", user.Name);
                     window.location.href = "index.html";
                     return;
