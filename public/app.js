@@ -327,11 +327,11 @@ async function loadCalendarEvents() {
     // Get the logged-in employee's userInfo document ID
     const currentUserID = sessionStorage.getItem("userID");
 
-    if (!currentUserID) {
-        window.location.href = "login.html";
-        return;
-    }
-
+ ///   if (!currentUserID) {
+  ///      window.location.href = "login.html";
+ ///       return;
+ ///   }
+///
     // Get all weekly schedule documents
     const snapshot = await getDocs(collection(db, "schedule"));
 

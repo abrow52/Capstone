@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://momentjs.com/downloads/moment.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Top Navigation -->
+    <div id="navbar">
+        <div class="nav-item" onclick="goTo('dashboard')">Dashboard</div>
+        <div class="nav-item" onclick="goTo('schedule')">My Schedule</div>
+        <div class="nav-item" onclick="goTo('profile')">Profile</div>
+        <div class="nav-item logout" onclick="logout()">Logout</div>
+    </div>
+
+    <!-- Welcome -->
+    <h2 id="welcome"></h2>
+
+    <!-- Calendar -->
+    <div id="calendar"></div>
+
+   <script type="module" src="./dashboard.js"></script>
+
+</body>
+</html>
