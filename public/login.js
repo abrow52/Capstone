@@ -40,7 +40,12 @@ loginForm.addEventListener("submit", async (event) => {
                     error.style.display = "none";
                     sessionStorage.setItem("userID", email.id.id);
                     sessionStorage.setItem("Name", user.Name);
-                    window.location.href = "index.html";
+                    sessionStorage.setItem("Title", user.Title);
+                    if(user.Title === "Manager"){
+                        window.location.href = "ManagerIndex.html";
+                    }
+                    else if (user.Title === "Associate")
+                    window.location.href = "AssociateIndex.html";
                     return;
                 }
             }
