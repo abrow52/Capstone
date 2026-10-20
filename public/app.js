@@ -11,6 +11,11 @@ const currentUserName = sessionStorage.getItem("Name");
 console.log("Logged-in user ID:", currentUserID);
 console.log("Logged-in user:", currentUserName);
 
+if (currentUserName) {
+  //display the username on the home page
+  document.getElementById("welcomeUsername").textContent = currentUserName;
+}
+
 //this is a template i found
 !function() {
 
@@ -30,15 +35,38 @@ console.log("Logged-in user:", currentUserName);
     }
   }
 
+  // Calendar.prototype.draw = function() {
+  //   //Create Header
+  //   this.drawHeader();
+
+  //   //Draw Month
+  //   this.drawMonth();
+
+  //   // this.drawLegend();
+  // }
+
   Calendar.prototype.draw = function() {
-    //Create Header
     this.drawHeader();
 
-    //Draw Month
-    this.drawMonth();
+    if (this.view === 'list') {
+      // Remove the traditional month grid
+      if (this.month) {
+        this.month.remove();
+        this.month = null;
+      }
 
-    // this.drawLegend();
-  }
+      this.drawAgenda();
+    } else {
+      // Remove the agenda when returning to calendar mode
+      if (this.agenda) {
+        this.agenda.remove();
+        this.agenda = null;
+      }
+
+      this.drawMonth();
+    }
+  };
+
 
   Calendar.prototype.drawHeader = function() {
     var self = this;
@@ -174,6 +202,98 @@ console.log("Logged-in user:", currentUserName);
       });
     }
   }
+
+
+  Calendar.prototype.drawAgenda = function() {
+    // Rebuild the list whenever the month changes
+    if (this.agenda) {
+      this.agenda.remove();
+    }
+
+    this.agenda = createElement('div', 'agenda-list');
+
+    const daysInMonth = this.current.daysInMonth();
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      const day = this.current.clone().date(i);
+
+      const row = createElement('div', 'agenda-row');
+
+      if (day.isSame(today, 'day')) {
+        row.classList.add('is-today');
+      }
+
+      // Left column: date
+      const dateColumn = createElement('div', 'agenda-date');
+
+      const weekday = createElement(
+        'div',
+        'agenda-weekday',
+        day.format('ddd')
+      );
+
+      const dateNumber = createElement(
+        'div',
+        'agenda-day-number',
+        day.format('D')
+      );
+
+      dateColumn.appendChild(weekday);
+      dateColumn.appendChild(dateNumber);
+
+      // Right column: every event on this date
+      const eventsColumn = createElement('div', 'agenda-events');
+
+      const todaysEvents = this.events.filter(function(ev) {
+        return ev.date.isSame(day, 'day');
+      });
+
+      if (todaysEvents.length === 0) {
+        eventsColumn.appendChild(
+          createElement('div', 'agenda-empty', 'No shifts scheduled')
+        );
+      } else {
+        todaysEvents.forEach(function(ev) {
+          const eventRow = createElement('div', 'agenda-event');
+
+          const colorSquare = createElement(
+            'span',
+            'event-category ' + ev.color
+          );
+
+          const eventName = createElement(
+            'span',
+            'agenda-event-name',
+            ev.eventName
+          );
+
+          eventRow.appendChild(colorSquare);
+          eventRow.appendChild(eventName);
+          eventsColumn.appendChild(eventRow);
+        });
+      }
+
+      row.appendChild(dateColumn);
+      row.appendChild(eventsColumn);
+
+      this.agenda.appendChild(row);
+    }
+
+    this.el.appendChild(this.agenda);
+  };
+
+
+  Calendar.prototype.toggleView = function() {
+    this.view = this.view === 'list' ? 'calendar' : 'list';
+
+    this.el.classList.toggle(
+      'list-view',
+      this.view === 'list'
+    );
+
+    this.draw();
+  };
+
 
   Calendar.prototype.getDayClass = function(day) {
     var classes = ['day'];
@@ -407,7 +527,24 @@ async function loadCalendarEvents() {
     }
 
     // Display the shifts
-    new Calendar("#calendar", data);
+    // new Calendar("#calendar", data);
+    
+    const calendar = new Calendar("#calendar", data);
+
+    const toggleButton = document.getElementById(
+      "toggleCalendarView"
+    );
+
+    if (toggleButton) {
+      toggleButton.addEventListener("click", function() {
+        calendar.toggleView();
+
+        toggleButton.textContent =
+          calendar.view === "list"
+            ? "Switch to Calendar View"
+            : "Switch to List View";
+      });
+    }
 }
 
 function formatTime(hour) {

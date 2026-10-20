@@ -1,0 +1,170 @@
+
+/* Calendar agenda / list view */
+
+#calendar.list-view {
+  width: min(900px, 100%);
+  height: auto;
+  max-height: 75vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 0;
+  background: white;
+}
+
+/* Keep the month heading and arrows at the top while scrolling */
+#calendar.list-view .header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: white;
+  z-index: 200;
+}
+
+/* The agenda rows */
+#calendar .agenda-list {
+  width: 100%;
+  background: white;
+}
+
+#calendar .agenda-row {
+  display: grid;
+  grid-template-columns: 145px minmax(0, 1fr);
+  gap: 18px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+}
+
+/* Today's date */
+#calendar .agenda-date {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#calendar .agenda-weekday {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6b7280;
+}
+
+#calendar .agenda-day-number {
+  font-size: 26px;
+  font-weight: 400;
+}
+
+#calendar .agenda-row.is-today {
+  background: #f0f8ff;
+}
+
+#calendar .agenda-row.is-today .agenda-day-number {
+  color: #368ac5;
+}
+
+/* The events on the right */
+#calendar .agenda-events {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+
+#calendar .agenda-event {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+#calendar .agenda-event-name {
+  overflow-wrap: anywhere;
+}
+
+/* Reuse your existing event colors */
+#calendar .agenda-event .event-category {
+  flex: 0 0 10px;
+  margin: 0;
+  border-radius: 2px;
+}
+
+#calendar .agenda-empty {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* View-switch button */
+#toggleCalendarView {
+  display: block;
+  margin: 12px auto;
+  padding: 9px 16px;
+  border: 1px solid #9ca3af;
+  border-radius: 6px;
+  background: white;
+  color: #111827;
+  cursor: pointer;
+}
+
+#toggleCalendarView:hover {
+  background: #f3f4f6;
+}
+
+@media (max-width: 600px) {
+  #calendar.list-view {
+    max-height: 75vh;
+  }
+
+  #calendar .agenda-row {
+    grid-template-columns: 85px minmax(0, 1fr);
+    gap: 10px;
+    padding: 14px 10px;
+  }
+
+  #calendar .agenda-day-number {
+    font-size: 22px;
+  }
+}
+
+
+/* Ensure shift times are visible in agenda view */
+#calendar.list-view .agenda-events {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  overflow: visible;
+}
+
+#calendar.list-view .agenda-event {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 24px;
+  color: #111827;
+  font-size: 15px;
+  line-height: 1.5;
+  visibility: visible;
+  opacity: 1;
+}
+
+#calendar.list-view .agenda-event-name {
+  display: inline-block;
+  color: #111827;
+  font-size: 15px;
+  visibility: visible;
+  opacity: 1;
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+}
+
+#calendar.list-view .agenda-event .event-category {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  min-width: 10px;
+  flex: 0 0 10px;
+}
