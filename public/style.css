@@ -13,13 +13,20 @@
 -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
 }
 
+header{
+  padding-bottom: 45px;
+}
+
 body {
+ padding-top: 50px;
  overflow: hidden;
  font-family: 'HelveticaNeue-UltraLight', 'Helvetica Neue UltraLight', 'Helvetica Neue', Arial, Helvetica, sans-serif;
  font-weight: 100;
  color: black;
  margin: 0;
  padding: 0;
+ padding-bottom: 50px;
+ overflow-y: auto;
  /* background: #4A4A4A; */
  -webkit-touch-callout: none;
  -webkit-user-select: none;
@@ -35,8 +42,12 @@ body {
   transform: translate3d(0, 0, 0);
   width: 700px;
   margin: 0 auto;
-  height: 750px;
+  height: auto;
   overflow: hidden;
+  border: 1px solid black;
+  padding-bottom: 0;
+  transition: height 0.3s ease;
+  box-shadow: 0px 0px 10px 4px rgb(80, 78, 78);
 }
 
 .header {
@@ -46,13 +57,14 @@ body {
   text-align: center;
   position:relative;
   z-index: 100;
+  border-bottom: 1px solid rgb(64, 69, 70);
 }
 
 .header h1 {
   margin: 0;
   padding: 0;
   font-size: 26px;
-  line-height: 65px;
+  line-height: 49px;
   font-weight: 100;
   letter-spacing: 1px;
 }
@@ -80,8 +92,9 @@ body {
 }
 
 .month {
-  /*overflow: hidden;*/
+  overflow: hidden;
   opacity: 0;
+
 }
 
 .month.new {
@@ -118,12 +131,16 @@ body {
 }
 
 .week {
- background: white;
+  background: white;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  width: 100%;
 }
 
 .day {
   display: inline-block;
-  width: 100px;
+  width: auto;
+  min-width: 0;
   padding: 15px;
   text-align: center;
   vertical-align: top;
@@ -218,7 +235,7 @@ body {
   height: 75px;
   padding: 7px 0;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
 }
 
 .events.in {
