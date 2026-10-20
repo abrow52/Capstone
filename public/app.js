@@ -22,12 +22,14 @@ console.log("Logged-in user:", currentUserName);
     this.current = moment().date(1);
     this.draw();
     var current = document.querySelector('.today');
-    if(current) {
-      var self = this;
-      window.setTimeout(function() {
-        self.openDay(current);
-      }, 500);
-    }
+    //this toggles the opening/closing of today's date on load (i just didn't like it opening on load)
+
+    // if(current) {
+    //   var self = this;
+    //   window.setTimeout(function() {
+    //     self.openDay(current);
+    //   }, 500);
+    // }
   }
 
   Calendar.prototype.draw = function() {
@@ -246,7 +248,7 @@ console.log("Logged-in user:", currentUserName);
 
     this.renderEvents(todaysEvents, details);
 
-    arrow.style.left = el.offsetLeft - el.parentNode.offsetLeft + 47 + 'px';
+    arrow.style.left = el.offsetLeft - el.parentNode.offsetLeft + 40 + 'px';
   }
 
   Calendar.prototype.renderEvents = function(events, ele) {
@@ -410,6 +412,46 @@ async function loadCalendarEvents() {
     new Calendar("#calendar", data);
 }
 
+async function loadOpenShifts() {
+    const snapshot = await getDocs(collection(db, "OpenShifts"));
+    const container = document.getElementById("openShifts");
+
+    container.innerHTML = "";
+
+    for (const openShiftDoc of snapshot.docs) {
+        const openShift = openShiftDoc.data();
+
+        // Get the date stored in OpenShifts
+        const shiftDate = moment(openShift.Date, "MM/DD/YYYY");
+
+        // Get the referenced shift document
+        if (!openShift.shiftID) continue;
+
+        const shiftDoc = await getDoc(openShift.shiftID);
+
+        if (!shiftDoc.exists()) continue;
+
+        const shiftDetails = shiftDoc.data();
+        const shiftTime = shiftDetails.ShiftTime;
+
+        if (!shiftTime) continue;
+
+        // Format the date and times
+        const formattedDate = shiftDate.format("MMMM D, YYYY");
+        const startTime = formatTime(shiftTime.StartTime);
+        const endTime = formatTime(shiftTime.EndTime);
+
+        // Display the open shift
+        container.innerHTML += `
+            <div class="open-shift">
+                <h3>Open Shifts</h3>
+                <p>Date: ${formattedDate}</p>
+                <p>Time: ${startTime} - ${endTime}</p>
+            </div>
+        `;
+    }
+}
+
 function formatTime(hour) {
     if (hour === 0) return "12 AM";
     if (hour < 12) return `${hour} AM`;
@@ -418,4 +460,5 @@ function formatTime(hour) {
 }
 
 loadCalendarEvents();
+loadOpenShifts();
 
