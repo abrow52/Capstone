@@ -14,8 +14,6 @@ console.log("Logged-in user:", currentUserName);
 if (currentUserName) {
   //display the username on the home page
   document.getElementById("welcomeUsername").textContent = currentUserName;
-  //hide login button in navbar after login
-  // document.getElementById("login-nav").style.display = "none";
 }
 
 //this is a template i found
