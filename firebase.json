@@ -20,6 +20,18 @@
       {
         "source": "/home",
         "destination": "/index.html"
+      },
+      {
+        "source": "/hub",
+        "destination": "/schedulingHub.html"
+      },
+      {
+        "source": "/requests",
+        "destination": "/requests.html"
+      },
+      {
+        "source": "/dash",
+        "destination": "/employeeDashboard.html"
       }
     ]
   }
