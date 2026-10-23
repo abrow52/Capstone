@@ -37,16 +37,6 @@ if (currentUserName) {
     // }
   }
 
-  // Calendar.prototype.draw = function() {
-  //   //Create Header
-  //   this.drawHeader();
-
-  //   //Draw Month
-  //   this.drawMonth();
-
-  //   // this.drawLegend();
-  // }
-
   Calendar.prototype.draw = function() {
     this.drawHeader();
 
@@ -551,7 +541,7 @@ async function loadCalendarEvents() {
 
 async function loadOpenShifts() {
     const snapshot = await getDocs(collection(db, "OpenShifts"));
-    const container = document.getElementById("openShifts");
+    const container = document.getElementById("shiftList");
 
     container.innerHTML = "";
 
@@ -580,11 +570,13 @@ async function loadOpenShifts() {
 
         // Display the open shift
         container.innerHTML += `
-            <div class="open-shift">
-                <h3>Open Shifts</h3>
-                <p>Date: ${formattedDate}</p>
-                <p>Time: ${startTime} - ${endTime}</p>
-            </div>
+                  <div class = "shiftInfo">
+                    <div>
+                      <p>Date: ${formattedDate}</p>
+                      <p>Time: ${startTime} - ${endTime}</p>
+                    </div>
+                      <button class = "PickUpButton" type = "button"> Pick Up </button>
+                  </div>
         `;
     }
 }

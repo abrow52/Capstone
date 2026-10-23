@@ -1,0 +1,48 @@
+.openShifts {
+    width: 400px;
+    height: 400px;
+    margin: -5px auto 30px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    color: black;
+    min-height: 150px;
+    box-shadow: 0px 0px 10px 4px rgb(80, 78, 78);
+}
+
+.openShifts h5{
+  border-bottom: 1px solid rgb(64, 69, 70);
+  padding-bottom: 10px;
+}
+
+.shiftInfo{
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shiftInfo p {
+  margin: 0px;
+}
+
+
+#home{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.PickUpButton{
+  display: block;
+  margin: 12px 10px;
+  padding: 9px 12px;
+  border: 1px solid #9ca3af;
+  border-radius: 6px;
+  background: white;
+  color: #111827;
+  cursor: pointer;
+}
+
+.PickUpButton:hover{
+  background-color: #f3f4f6;
+}

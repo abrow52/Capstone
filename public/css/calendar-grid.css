@@ -51,40 +51,6 @@ body {
   flex: 2;
 }
 
-#openShifts {
-    width: 300px;
-    height: 400px;
-    margin: -5px auto 30px;
-    padding: 20px;
-    background-color: #e5e7eb;
-    border-radius: 8px;
-    color: black;
-    min-height: 150px;
-    box-shadow: 0px 0px 10px 4px rgb(80, 78, 78);
-}
-
-.openShifts h5{
-  border-bottom: 1px solid rgb(64, 69, 70);
-  padding-bottom: 10px;
-}
-
-/* #openShifts, #calendar{
-  flex: 1; 
-} */
-
-#home{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* .calendar-divider {
-    width: 1000px;
-    margin: 5px 0 0 auto;
-    border: none;
-    border-top: 1px solid #040404;
-} */
-
 .header {
   height: 50px;
   width: 600px;
