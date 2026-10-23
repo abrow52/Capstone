@@ -6,7 +6,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "public",
+    "public": "html",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -15,23 +15,23 @@
     "rewrites": [
       {
         "source": "/login",
-        "destination": "/html/login.html"
+        "destination": "/login.html"
       },
       {
         "source": "/home",
-        "destination": "/html/index.html"
+        "destination": "/AssociateIndex.html"
       },
       {
         "source": "/hub",
-        "destination": "/html/schedulingHub.html"
+        "destination": "/schedulingHub.html"
       },
       {
         "source": "/requests",
-        "destination": "/html/requests.html"
+        "destination": "/requests.html"
       },
       {
         "source": "/dash",
-        "destination": "/html/employeeDashboard.html"
+        "destination": "/employeeDashboard.html"
       }
     ]
   }
