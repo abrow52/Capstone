@@ -1,7 +1,4 @@
 //login JS
-
-
-
 import {db} from "./firebase.js";
 import {collection, getDocs, getDoc} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 // import {getAuth} from "./firebase.js/auth";
@@ -41,12 +38,15 @@ loginForm.addEventListener("submit", async (event) => {
                     sessionStorage.setItem("userID", email.id.id);
                     sessionStorage.setItem("Name", user.Name);
                     sessionStorage.setItem("Title", user.Title);
-                    if(user.Title === "Manager"){
-                        window.location.href = "ManagerIndex.html";
+                    // if(user.Title === "Manager"){
+                    //     window.location.href = "../index.html";
+                    // }
+                     if (user.Title === "Associate"){
+                        window.location.href = "AssociateIndex.html";
+                        console.log("redirected");
+                        return;
                     }
-                    else if (user.Title === "Associate")
-                    window.location.href = "AssociateIndex.html";
-                    return;
+                    
                 }
             }
         }

@@ -13,29 +13,27 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "/",
-        "destination": "/html/login.html"
-      },
+     
       {
         "source": "/login",
-        "destination": "/html/login.html"
+        "destination": "/login.html"
       },
       {
         "source": "/home",
-        "destination": "/html/AssociateIndex.html"
+        "destination": "/index.html"
       },
       {
         "source": "/hub",
-        "destination": "/html/schedulingHub.html"
+        "destination": "/schedulingHub.html"
       },
       {
+
         "source": "/requests",
-        "destination": "/html/requests.html"
+        "destination": "/requests.html"
       },
       {
         "source": "/dash",
-        "destination": "/html/employeeDashboard.html"
+        "destination": "/employeeDashboard.html"
       }
     ]
   }
