@@ -20,7 +20,7 @@
       },
       {
         "source": "/home",
-        "destination": "/index.html"
+        "destination": "/AssociateIndex.html"
       },
       {
         "source": "/hub",

@@ -98,7 +98,7 @@
 /* View-switch button */
 #toggleCalendarView {
   display: block;
-  margin: 12px auto;
+  margin: 12px 12px 30px 400px;
   padding: 9px 16px;
   border: 1px solid #9ca3af;
   border-radius: 6px;
