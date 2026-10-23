@@ -7,9 +7,14 @@ const snapshot = await getDocs(collection(db, "userInfo"));
 
 const currentUserID = sessionStorage.getItem("userID");
 const currentUserName = sessionStorage.getItem("Name");
+const currentTitle = sessionStorage.getItem("Title");
 
-console.log("Logged-in user ID:", currentUserID);
-console.log("Logged-in user:", currentUserName);
+// console.log("Logged-in user ID:", currentUserID);
+// console.log("Logged-in user:", currentUserName);
+
+if(currentTitle === "Manager"){
+    document.getElementById("managerLink").style.display = "block";
+  }
 
 if (currentUserName) {
   //display the username on the home page

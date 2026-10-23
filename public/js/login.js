@@ -38,15 +38,13 @@ loginForm.addEventListener("submit", async (event) => {
                     sessionStorage.setItem("userID", email.id.id);
                     sessionStorage.setItem("Name", user.Name);
                     sessionStorage.setItem("Title", user.Title);
-                    // if(user.Title === "Manager"){
-                    //     window.location.href = "../index.html";
-                    // }
-                     if (user.Title === "Associate"){
-                        window.location.href = "AssociateIndex.html";
-                        console.log("redirected");
-                        return;
-                    }
-                    
+                   
+                      console.log("User:", user);
+                        console.log("Title:", user.Title);
+                        console.log("Link:", document.getElementById("managerLink"));
+
+                    window.location.href = "AssociateIndex.html";
+
                 }
             }
         }
