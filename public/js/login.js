@@ -1,7 +1,4 @@
 //login JS
-
-
-
 import {db} from "./firebase.js";
 import {collection, getDocs, getDoc} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 // import {getAuth} from "./firebase.js/auth";
@@ -40,8 +37,14 @@ loginForm.addEventListener("submit", async (event) => {
                     error.style.display = "none";
                     sessionStorage.setItem("userID", email.id.id);
                     sessionStorage.setItem("Name", user.Name);
-                    window.location.href = "index.html";
-                    return;
+                    sessionStorage.setItem("Title", user.Title);
+                   
+                      console.log("User:", user);
+                        console.log("Title:", user.Title);
+                        console.log("Link:", document.getElementById("managerLink"));
+
+                    window.location.href = "AssociateIndex.html";
+
                 }
             }
         }

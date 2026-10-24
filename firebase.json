@@ -13,19 +13,21 @@
       "**/node_modules/**"
     ],
     "rewrites": [
+     
       {
         "source": "/login",
         "destination": "/login.html"
       },
       {
         "source": "/home",
-        "destination": "/index.html"
+        "destination": "/AssociateIndex.html"
       },
       {
         "source": "/hub",
         "destination": "/schedulingHub.html"
       },
       {
+
         "source": "/requests",
         "destination": "/requests.html"
       },
