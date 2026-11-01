@@ -13,7 +13,10 @@ const currentTitle = sessionStorage.getItem("Title");
 // console.log("Logged-in user:", currentUserName);
 
 if(currentTitle === "Manager"){
-    document.getElementById("managerLink").style.display = "block";
+  managerOnly = document.getElementById("managerLink"); 
+
+  if(managerLink != null )
+    managerOnly.style.display = "block";
   }
 
 if (currentUserName) {

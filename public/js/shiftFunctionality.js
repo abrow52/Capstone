@@ -4,15 +4,13 @@ import {collection, getDocs, addDoc, doc, deleteDoc} from "https://www.gstatic.c
 
 import { loadOpenShifts } from "./calendar.js";
 
-// Get logged-in user information
+//logged-in user information
 const currentUserID = sessionStorage.getItem("userID");
 const currentUserName = sessionStorage.getItem("Name");
 const currentTitle = sessionStorage.getItem("Title");
 
-// Get the shift container
+// THIS IS FOR THE PICKUP SHIFT FUNCTIONALITY 
 const container = document.getElementById("shiftList");
-
-// Add event listener for Pickup buttons
 container.addEventListener("click", async function(event) {
 
  const button = event.target.closest(".PickUpButton");
@@ -62,6 +60,5 @@ container.addEventListener("click", async function(event) {
 
         }
 });
-
-// Load open shifts
+//---------------------------------------
 loadOpenShifts();
