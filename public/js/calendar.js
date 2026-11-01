@@ -2,13 +2,13 @@
 import {db} from "./firebase.js";
 import {collection, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-
 const snapshot = await getDocs(collection(db, "userInfo"));
 
 const currentUserID = sessionStorage.getItem("userID");
 const currentUserName = sessionStorage.getItem("Name");
 const currentTitle = sessionStorage.getItem("Title");
 
+// return formattedDate, startTime, EndTime; 
 // console.log("Logged-in user ID:", currentUserID);
 // console.log("Logged-in user:", currentUserName);
 
@@ -544,46 +544,53 @@ async function loadCalendarEvents() {
     }
 }
 
-async function loadOpenShifts() {
+export async function loadOpenShifts() {
     const snapshot = await getDocs(collection(db, "OpenShifts"));
     const container = document.getElementById("shiftList");
 
     container.innerHTML = "";
 
     for (const openShiftDoc of snapshot.docs) {
-        const openShift = openShiftDoc.data();
+      const openShift = openShiftDoc.data();
 
-        // Get the date stored in OpenShifts
-        const shiftDate = moment(openShift.Date, "MM/DD/YYYY");
+      const shiftDate = moment(openShift.Date, "MM/DD/YYYY");
 
-        // Get the referenced shift document
-        if (!openShift.shiftID) continue;
+      if (!openShift.shiftID) continue;
 
-        const shiftDoc = await getDoc(openShift.shiftID);
+      const shiftDoc = await getDoc(openShift.shiftID);
 
-        if (!shiftDoc.exists()) continue;
+      if (!shiftDoc.exists()) continue;
 
-        const shiftDetails = shiftDoc.data();
-        const shiftTime = shiftDetails.ShiftTime;
+      const shiftDetails = shiftDoc.data();
+      const shiftTime = shiftDetails.ShiftTime;
 
-        if (!shiftTime) continue;
+      if (!shiftTime) continue;
 
-        // Format the date and times
-        const formattedDate = shiftDate.format("MMMM D, YYYY");
-        const startTime = formatTime(shiftTime.StartTime);
-        const endTime = formatTime(shiftTime.EndTime);
+      const formattedDate = shiftDate.format("MMMM D, YYYY");
+      const startTime = formatTime(shiftTime.StartTime);
+      const endTime = formatTime(shiftTime.EndTime);
+  
+      const template = document.getElementById("shiftTemplate");
 
-        // Display the open shift
-        container.innerHTML += `
-                  <div class = "shiftInfo">
-                    <div>
-                      <p>Date: ${formattedDate}</p>
-                      <p>Time: ${startTime} - ${endTime}</p>
-                    </div>
-                      <button class = "PickUpButton" type = "button"> Pick Up </button>
-                  </div>
-        `;
-    }
+      const shift = template.content.cloneNode(true);
+
+      shift.querySelector(".shiftDate").textContent =
+          `Date: ${formattedDate}`;
+
+      shift.querySelector(".shiftTime").textContent =
+          `Time: ${startTime} - ${endTime}`;
+
+      const button = shift.querySelector(".PickUpButton");
+
+      button.dataset.shiftId = openShiftDoc.id;
+      button.dataset.date = formattedDate;
+      button.dataset.start = startTime;
+      button.dataset.end = endTime;
+
+
+      container.appendChild(shift);
+ }    
+
 }
 
 function formatTime(hour) {
@@ -594,5 +601,4 @@ function formatTime(hour) {
 }
 
 loadCalendarEvents();
-loadOpenShifts();
 
