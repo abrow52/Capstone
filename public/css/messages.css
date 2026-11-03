@@ -1,0 +1,119 @@
+.mailbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.45);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+}
+
+.mailbox-window {
+  background: white;
+  width: 100%;
+  max-width: 650px;
+  max-height: 85vh;
+  overflow-y: auto;
+
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
+}
+
+.mailbox-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.mailbox-header button {
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+#showCompose {
+  display: inline-block;
+  visibility: visible;
+  opacity: 1;
+  background-color: rgb(16, 177, 177);
+  color: white;
+  font-size: 16px;
+  border: 1px solid black;
+}
+
+h5{
+  padding-top: 20px;
+}
+
+#mail {
+  margin-top: 15px;
+}
+
+.message-preview {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.message-preview:hover {
+  background: #f3f3f3;
+}
+
+.message-preview p {
+  margin: 3px 0;
+}
+
+.message-preview.unread {
+  background: #eef5ff;
+  font-weight: bold;
+}
+
+#messageDetails {
+  margin: 20px 0;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+#messageDetails p {
+  white-space: pre-wrap;
+}
+
+#replyForm,
+#sendMessageForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+#replyForm textarea,
+#sendMessageForm textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+#sendMessageForm input,
+#sendMessageForm select,
+#sendMessageForm textarea,
+#replyForm textarea {
+  width: 100%;
+  padding: 9px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+@media (max-width: 600px) {
+  .mailbox-window {
+      max-height: 90vh;
+      padding: 15px;
+  }
+}

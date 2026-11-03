@@ -2,13 +2,16 @@
 /* Calendar agenda / list view */
 
 #calendar.list-view {
-  width: min(900px, 100%);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: auto;
-  max-height: 75vh;
+  max-height: 90vh;
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: 0;
   background: white;
+  box-sizing: border-box;
 }
 
 /* Keep the month heading and arrows at the top while scrolling */
@@ -95,10 +98,9 @@
   font-size: 14px;
 }
 
-/* View-switch button */
 #toggleCalendarView {
   display: block;
-  margin: 12px 12px 30px 400px;
+  margin: 12px 0 20px 0;
   padding: 9px 16px;
   border: 1px solid #9ca3af;
   border-radius: 6px;
