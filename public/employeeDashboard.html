@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html>
   <link rel="stylesheet" href="css/calendar-grid.css">
+  <link rel="stylesheet" href="css/universal.css" >
+  <link rel="stylesheet" href="css/messages.css" >
   <script type="module" src="js/calendar.js"></script>
+  <script type="module" src="js/requests.js"></script>
+  <script type="module" src="js/messages.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js"></script>
@@ -10,24 +14,77 @@
     <title>Home</title>
     <div class="navbar shadow-sm">
       <div class="container">
-        <!-- <a href="/" class="navbar-brand d-flex align-items-center">
-          <strong>Schedule Genie</strong>
-        </a> -->
         <a class="navbar-brand d-flex align-items-center">
           <strong id="welcomeUsername"></strong>
         </a>
         <div class="align-items-center">
-          <ul style="display:flex; list-style-type: none; gap: 10px">
+          <ul id="navItems" style="display:flex; list-style-type: none; gap: 10px">
               <li class="nav-item"><a class="nav-link" href="/home">Home</a></li>
-              <li class="nav-item"><a class="nav-link" href="/requests">Requests</a></li>
-              <li class="nav-item"><a class="nav-link" href="/hub">Scheudling Hub</a></li>
+              <li class="nav-item" id = "managerLink" style = "display:none;"><a class="nav-link" href="/hub">Scheduling Hub</a></li>              
               <li class="nav-item"><a class="nav-link" aria-current="page" href="/dash">Employee Dashboard</a></li>
+              <li class="nav-item">
+                <button type="button" id="openMailbox" class="open-button" style="border:none; background:none; padding:0;">
+                    Mailbox
+                </button>
+              </li>
           </ul>
         </div>
       </div>
     </div>
   </header>
   <body>
+    <!-- Mailbox overlay -->
+    <div id="myForm" class="mailbox-overlay" style="display:none;">
+      <div class="mailbox-window">
+        <div class="mailbox-header">
+          <h2>Mailbox</h2>
+          <!-- <button type="button" id="showCompose" class="btn btn-primary">
+            Compose Message
+          </button> -->
+          <button type="button" id="closeMailbox">✕</button>
+        </div>
+        <!-- INBOX VIEW -->
+        <div id="inboxView">
+          <button type="button" id="showCompose" class="btn btn-primary">
+            Compose Message
+          </button>
+          <h5>Inbox</h5>
+          <div id="mail"></div>
+        </div>
+        <!-- READ MESSAGE VIEW -->
+        <div id="readMessageView" style="display:none;">
+          <button type="button" id="backToInbox" class="btn btn-secondary">
+            ← Back to Inbox
+          </button>
+          <div id="messageDetails"></div>
+          <form id="replyForm">
+            <label for="replyBody">Write a reply</label>
+            <textarea id="replyBody" required></textarea>
+            <button type="submit" class="btn btn-primary">Send Reply</button>
+          </form>
+        </div>
+        <!-- COMPOSE MESSAGE VIEW -->
+        <div id="composeView" style="display:none;">
+          <button type="button" id="backFromCompose" class="btn btn-secondary">
+            ← Back to Inbox
+          </button>
+          <h5>New Message</h5>
+          <form id="sendMessageForm">
+            <label for="employee-name">To</label>
+            <select id="employee-name" required>
+              <option value="">Select an employee</option>
+            </select>
+            <label for="messageSubject">Subject</label>
+            <input type="text" id="messageSubject" required>
+            <label for="messageBody">Message</label>
+            <textarea id="messageBody" required></textarea>
+            <button type="submit" class="btn btn-primary">
+              Send Message
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
     <div class="col-md-6">
       <button class="btn btn-primary" type="button" onclick="unhideForm()" style=" margin-left: 20px; margin-bottom: 20px;">Add Employee</button>
       <form id="addUserForm" style="max-width: 500px; margin-left: 20px; display:none;">

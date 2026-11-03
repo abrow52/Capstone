@@ -52,6 +52,11 @@ if (currentUserName) {
         this.month = null;
       }
 
+      if (this.weekHeader) {
+        this.weekHeader.remove();
+        this.weekHeader = null;
+      }
+
       this.drawAgenda();
     } else {
       // Remove the agenda when returning to calendar mode
@@ -60,6 +65,7 @@ if (currentUserName) {
         this.agenda = null;
       }
 
+      this.drawWeekHeader();
       this.drawMonth();
     }
   };
@@ -89,6 +95,26 @@ if (currentUserName) {
 
     this.title.innerHTML = this.current.format('MMMM YYYY');
   }
+
+  Calendar.prototype.drawWeekHeader = function() {
+    if (!this.weekHeader) {
+        // Create the weekday header container
+        this.weekHeader = createElement('div', 'weekHeader');
+
+        // Weekday names
+        var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        // Create each weekday column
+        days.forEach(function(day) {
+            var dayElement = createElement('div', 'weekday');
+            dayElement.textContent = day;
+            this.weekHeader.appendChild(dayElement);
+        }, this);
+
+        // Add the weekday row to the calendar
+        this.el.appendChild(this.weekHeader);
+    }
+};
 
   Calendar.prototype.drawMonth = function() {
     var self = this;
@@ -193,9 +219,28 @@ if (currentUserName) {
         return memo;
       }, []);
 
+      // todaysEvents.forEach(function(ev) {
+      //   var evSpan = createElement('span', ev.color);
+      //   element.appendChild(evSpan);
+      // });
       todaysEvents.forEach(function(ev) {
-        var evSpan = createElement('span', ev.color);
-        element.appendChild(evSpan);
+          var evSpan = createElement('div', 'calendar-event');
+      
+          var colorSquare = createElement(
+              'span',
+              'event-category ' + ev.color
+          );
+      
+          var eventName = createElement(
+              'span',
+              'calendar-event-name',
+              ev.eventName
+          );
+      
+          evSpan.appendChild(colorSquare);
+          evSpan.appendChild(eventName);
+      
+          element.appendChild(evSpan);
       });
     }
   }

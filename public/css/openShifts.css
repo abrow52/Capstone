@@ -25,15 +25,6 @@
   margin: 0px;
 }
 
-
-#home{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* gap: 30px; */
-  min-height: 60vh;
-}
-
 .PickUpButton{
   display: block;
   margin: 12px 10px;
