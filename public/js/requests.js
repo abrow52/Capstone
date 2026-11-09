@@ -139,8 +139,6 @@ container.addEventListener("click", async function(event) {
         const endTime = button.dataset.end;
         const openShiftId = button.dataset.openShiftId;
 
-        console.log("Open Shift ID:", openShiftId);
-
         const snapshot = await getDocs(collection(db, "ShiftRequests"));
 
          for (const requestDoc of snapshot.docs) {

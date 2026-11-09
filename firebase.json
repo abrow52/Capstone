@@ -29,6 +29,10 @@
       {
         "source": "/dash",
         "destination": "/employeeDashboard.html"
+      },
+      {
+        "source": "/requests",
+        "destination": "/requests.html"
       }
     ]
   }

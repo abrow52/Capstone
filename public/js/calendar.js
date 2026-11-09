@@ -626,9 +626,9 @@ export async function loadOpenShifts() {
                       <p>Time: ${startTime} - ${endTime}</p>
                     </div>
                       <button class = "PickUpButton" type = "button"
-                      data-date="${openShift.Date}"
-                      data-start="${shiftTime.StartTime}"
-                      data-end="${shiftTime.EndTime}"
+                      data-date="${formattedDate}"
+                      data-start="${startTime}"
+                      data-end="${endTime}"
                       data-open-shift-id="${openShiftDoc.id}">
                       Pick Up </button>
                   </div>
