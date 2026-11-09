@@ -40,7 +40,7 @@ async function ManagerloadShiftRequests() {
         approveButton.addEventListener("click", async function() {
 
             await updateDoc(doc(db, "ShiftRequests", requestDoc.id), {
-                Status: "Approved"re
+                Status: "Approved"
             });
 
             
