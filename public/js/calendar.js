@@ -589,7 +589,7 @@ async function loadCalendarEvents() {
     }
 }
 
-async function loadOpenShifts() {
+export async function loadOpenShifts() {
     const snapshot = await getDocs(collection(db, "OpenShifts"));
     const container = document.getElementById("shiftList");
 
@@ -625,7 +625,12 @@ async function loadOpenShifts() {
                       <p>Date: ${formattedDate}</p>
                       <p>Time: ${startTime} - ${endTime}</p>
                     </div>
-                      <button class = "PickUpButton" type = "button"> Pick Up </button>
+                      <button class = "PickUpButton" type = "button"
+                      data-date="${openShift.Date}"
+                      data-start="${shiftTime.StartTime}"
+                      data-end="${shiftTime.EndTime}"
+                      data-open-shift-id="${openShiftDoc.id}">
+                      Pick Up </button>
                   </div>
         `;
     }
@@ -639,5 +644,4 @@ function formatTime(hour) {
 }
 
 loadCalendarEvents();
-loadOpenShifts();
 
