@@ -138,12 +138,14 @@ container.addEventListener("click", async function(event) {
         const startTime = button.dataset.start;
         const endTime = button.dataset.end;
         const openShiftId = button.dataset.openShiftId;
+        const shiftId = button.dataset.shiftId;
 
         const snapshot = await getDocs(collection(db, "ShiftRequests"));
 
          for (const requestDoc of snapshot.docs) {
             const request = requestDoc.data();
-                if(request.shiftID == openShiftId){
+                if (request.Date == openShiftId && request.StartTime == startTime && 
+                        request.EndTime == endTime && request.Status == "Pending") {
                     alert("Shift was already requested");
                     return; 
                 }
@@ -158,7 +160,7 @@ container.addEventListener("click", async function(event) {
                 StartTime: startTime,
                 EndTime: endTime,
                 Status: "Pending", 
-                shiftID: openShiftId
+                shiftID: doc(db, "shifts", shiftId)
             });
 
             await deleteDoc(doc(db, "OpenShifts", openShiftId));

@@ -1,6 +1,7 @@
 import { db } from "./firebase.js";
 
-import {collection, getDocs, updateDoc, doc} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import {collection, getDocs, updateDoc, doc, addDoc, deleteDoc} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { formatTime } from "./calendar.js";
 
 //logged-in user information
 const currentUserID = sessionStorage.getItem("userID");
@@ -30,35 +31,62 @@ async function ManagerloadShiftRequests() {
             "Date: " + request.Date;
 
         card.querySelector(".requestTime").textContent =
-            "Time: " + request.StartTime + " - " + request.EndTime;
+            "Time:" + formatTime(request.StartTime) + " - " + formatTime(request.EndTime);
 
         card.querySelector(".requestStatus").textContent =
             "Status: " + request.Status;
 
         const approveButton = card.querySelector(".approveButton");
+        const denyButton = card.querySelector(".denyButton");
+
+        if (request.Status !== "Pending") {
+            approveButton.remove();
+            denyButton.remove();
+        }
 
         approveButton.addEventListener("click", async function() {
 
-            await updateDoc(doc(db, "ShiftRequests", requestDoc.id), {
-                Status: "Approved"
-            });
+             try {
 
-            
+                await updateDoc(doc(db, "ShiftRequests", requestDoc.id), {
+                    Status: "Approved"
+                });
 
-            loadShiftRequests();
+                alert("Request approved!");
+
+                ManagerloadShiftRequests();
+
+            } catch (error) {
+                console.error("Error approving request:", error);
+                alert("Unable to approve request.");
+            }
+
         });
-
-
-
-        const denyButton = card.querySelector(".denyButton");
 
         denyButton.addEventListener("click", async function() {
 
-            await updateDoc(doc(db, "ShiftRequests", requestDoc.id), {
-                Status: "Denied"
-            });
+           try {
 
-            loadShiftRequests();
+                await updateDoc(doc(db, "ShiftRequests", requestDoc.id), {
+                    Status: "Denied"
+                });
+
+                await addDoc(collection(db, "OpenShifts"), {
+                        Date: request.Date,
+                        shiftID: request.shiftID
+                    });
+
+                await deleteDoc(doc(db, "ShiftRequests", requestDoc.id));
+
+                alert("Request denied. Shift is available again!");
+
+
+                ManagerloadShiftRequests();
+
+            } catch (error) {
+                console.error("Error denying request:", error);
+                alert("Unable to deny request.");
+            }
         });
 
 

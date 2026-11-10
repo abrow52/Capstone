@@ -606,6 +606,7 @@ export async function loadOpenShifts() {
         if (!openShift.shiftID) continue;
 
         const shiftDoc = await getDoc(openShift.shiftID);
+        console.log("Shift document ID:", openShift.shiftID.id);
 
         if (!shiftDoc.exists()) continue;
 
@@ -613,6 +614,9 @@ export async function loadOpenShifts() {
         const shiftTime = shiftDetails.ShiftTime;
 
         if (!shiftTime) continue;
+
+        const shiftId = shiftDoc.id;
+        console.log("Original shift ID:", shiftId);
 
         // Format the date and times
         const formattedDate = shiftDate.format("MMMM D, YYYY");
@@ -627,20 +631,25 @@ export async function loadOpenShifts() {
                       <p>Time: ${startTime} - ${endTime}</p>
                     </div>
                       <button class = "PickUpButton" type = "button"
-                      data-date="${formattedDate}"
-                      data-start="${startTime}"
-                      data-end="${endTime}"
-                      data-open-shift-id="${openShiftDoc.id}">
+                      data-date="${openShift.Date}"
+                      data-start="${shiftTime.StartTime}"
+                      data-end="${shiftTime.EndTime}"
+                      data-open-shift-id="${openShiftDoc.id}"
+                      data-shift-id="${shiftId}">
                       Pick Up </button>
                   </div>
         `;
     }
 }
 
-function formatTime(hour) {
+export function formatTime(time) {
+
+    const hour = parseInt(time.split(":")[0]);
+
     if (hour === 0) return "12 AM";
     if (hour < 12) return `${hour} AM`;
     if (hour === 12) return "12 PM";
+
     return `${hour - 12} PM`;
 }
 
