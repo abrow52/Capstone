@@ -11,6 +11,7 @@ const currentTitle = sessionStorage.getItem("Title");
 
 if(currentTitle === "Manager"){
     document.getElementById("managerLink").style.display = "block";
+    document.getElementById("requestsLink").style.display = "block";
   }
 
 if (currentUserName) {
