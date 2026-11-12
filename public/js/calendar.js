@@ -9,9 +9,6 @@ const currentUserID = sessionStorage.getItem("userID");
 const currentUserName = sessionStorage.getItem("Name");
 const currentTitle = sessionStorage.getItem("Title");
 
-// console.log("Logged-in user ID:", currentUserID);
-// console.log("Logged-in user:", currentUserName);
-
 if(currentTitle === "Manager"){
     document.getElementById("managerLink").style.display = "block";
   }
@@ -32,14 +29,6 @@ if (currentUserName) {
     this.current = moment().date(1);
     this.draw();
     var current = document.querySelector('.today');
-    //this toggles the opening/closing of today's date on load (i just didn't like it opening on load)
-
-    // if(current) {
-    //   var self = this;
-    //   window.setTimeout(function() {
-    //     self.openDay(current);
-    //   }, 500);
-    // }
   }
 
   Calendar.prototype.draw = function() {
@@ -239,8 +228,17 @@ if (currentUserName) {
       
           evSpan.appendChild(colorSquare);
           evSpan.appendChild(eventName);
+
+          evSpan.addEventListener('click', function(event) {
+              event.stopPropagation();
+      
+              if (window.isScheduleMode && window.selectShiftForScheduling) {
+                  window.selectShiftForScheduling(ev);
+              }
+          });
       
           element.appendChild(evSpan);
+          evSpan.dataset.shiftKey = `${ev.date.format("YYYY-MM-DD")}|${ev.shiftID}`;
       });
     }
   }
@@ -297,6 +295,15 @@ if (currentUserName) {
       } else {
         todaysEvents.forEach(function(ev) {
           const eventRow = createElement('div', 'agenda-event');
+          eventRow.dataset.shiftKey =
+            `${ev.date.format("YYYY-MM-DD")}|${ev.shiftID}`;
+            eventRow.addEventListener("click", function(event) {
+              event.stopPropagation();
+          
+              if (window.isScheduleMode && window.selectShiftForScheduling) {
+                  window.selectShiftForScheduling(ev);
+              }
+          });
 
           const colorSquare = createElement(
             'span',
@@ -347,69 +354,69 @@ if (currentUserName) {
     return classes.join(' ');
   }
 
-  Calendar.prototype.openDay = function(el) {
-    var details, arrow;
-    var dayNumber = +el.querySelectorAll('.day-number')[0].innerText || +el.querySelectorAll('.day-number')[0].textContent;
-    var day = this.current.clone().date(dayNumber);
+  // Calendar.prototype.openDay = function(el) {
+  //   var details, arrow;
+  //   var dayNumber = +el.querySelectorAll('.day-number')[0].innerText || +el.querySelectorAll('.day-number')[0].textContent;
+  //   var day = this.current.clone().date(dayNumber);
 
-    var currentOpened = document.querySelector('.details');
+  //   var currentOpened = document.querySelector('.details');
 
-    //Check to see if there is an open detais box on the current row
-    if(currentOpened && currentOpened.parentNode === el.parentNode) {
-        //   details = currentOpened;
-        //   arrow = document.querySelector('.arrow');
-        // Close the dropdown when clicking the same day again
-        currentOpened.className = 'details out';
+  //   //Check to see if there is an open detais box on the current row
+  //   if(currentOpened && currentOpened.parentNode === el.parentNode) {
+  //       //   details = currentOpened;
+  //       //   arrow = document.querySelector('.arrow');
+  //       // Close the dropdown when clicking the same day again
+  //       currentOpened.className = 'details out';
 
-        currentOpened.addEventListener('animationend', function() {
-            if (currentOpened.parentNode) {
-                currentOpened.parentNode.removeChild(currentOpened);
-            }
-    });
+  //       currentOpened.addEventListener('animationend', function() {
+  //           if (currentOpened.parentNode) {
+  //               currentOpened.parentNode.removeChild(currentOpened);
+  //           }
+  //   });
 
-    return;
-    } else {
-      //Close the open events on differnt week row
-      //currentOpened && currentOpened.parentNode.removeChild(currentOpened);
-      if(currentOpened) {
-        currentOpened.addEventListener('webkit                AnimationEnd', function() {
-          currentOpened.parentNode.removeChild(currentOpened);
-        });
-        currentOpened.addEventListener('oanimationend', function() {
-          currentOpened.parentNode.removeChild(currentOpened);
-        });
-        currentOpened.addEventListener('msAnimationEnd', function() {
-          currentOpened.parentNode.removeChild(currentOpened);
-        });
-        currentOpened.addEventListener('animationend', function() {
-          currentOpened.parentNode.removeChild(currentOpened);
-        });
-        currentOpened.className = 'details out';
-      }
+  //   return;
+  //   } else {
+  //     //Close the open events on differnt week row
+  //     //currentOpened && currentOpened.parentNode.removeChild(currentOpened);
+  //     if(currentOpened) {
+  //       currentOpened.addEventListener('webkit                AnimationEnd', function() {
+  //         currentOpened.parentNode.removeChild(currentOpened);
+  //       });
+  //       currentOpened.addEventListener('oanimationend', function() {
+  //         currentOpened.parentNode.removeChild(currentOpened);
+  //       });
+  //       currentOpened.addEventListener('msAnimationEnd', function() {
+  //         currentOpened.parentNode.removeChild(currentOpened);
+  //       });
+  //       currentOpened.addEventListener('animationend', function() {
+  //         currentOpened.parentNode.removeChild(currentOpened);
+  //       });
+  //       currentOpened.className = 'details out';
+  //     }
 
-      //Create the Details Container
-      details = createElement('div', 'details in');
+  //     //Create the Details Container
+  //     details = createElement('div', 'details in');
 
-      //Create the arrow
-      var arrow = createElement('div', 'arrow');
+  //     //Create the arrow
+  //     var arrow = createElement('div', 'arrow');
 
-      //Create the event wrapper
+  //     //Create the event wrapper
 
-      details.appendChild(arrow);
-      el.parentNode.appendChild(details);
-    }
+  //     details.appendChild(arrow);
+  //     el.parentNode.appendChild(details);
+  //   }
 
-    var todaysEvents = this.events.reduce(function(memo, ev) {
-      if(ev.date.isSame(day, 'day')) {
-        memo.push(ev);
-      }
-      return memo;
-    }, []);
+  //   var todaysEvents = this.events.reduce(function(memo, ev) {
+  //     if(ev.date.isSame(day, 'day')) {
+  //       memo.push(ev);
+  //     }
+  //     return memo;
+  //   }, []);
 
-    this.renderEvents(todaysEvents, details);
+  //   this.renderEvents(todaysEvents, details);
 
-    arrow.style.left = el.offsetLeft - el.parentNode.offsetLeft + 40 + 'px';
-  }
+  //   arrow.style.left = el.offsetLeft - el.parentNode.offsetLeft + 40 + 'px';
+  // }
 
   Calendar.prototype.renderEvents = function(events, ele) {
     //Remove any events in the current details element
@@ -457,15 +464,35 @@ if (currentUserName) {
     }
   }
 
+  // Calendar.prototype.nextMonth = function() {
+  //   this.current.add('months', 1);
+  //   this.next = true;
+  //   this.draw();
+  // }
   Calendar.prototype.nextMonth = function() {
     this.current.add('months', 1);
     this.next = true;
+
+    if (this.onMonthChange) {
+        this.onMonthChange();
+    }
+
     this.draw();
   }
 
+  // Calendar.prototype.prevMonth = function() {
+  //   this.current.subtract('months', 1);
+  //   this.next = false;
+  //   this.draw();
+  // }
   Calendar.prototype.prevMonth = function() {
     this.current.subtract('months', 1);
     this.next = false;
+
+    if (this.onMonthChange) {
+        this.onMonthChange();
+    }
+
     this.draw();
   }
 
@@ -483,112 +510,179 @@ if (currentUserName) {
   }
 }();
 
-
-//this is the function that gets the schedule from the db
 async function loadCalendarEvents() {
-    // Get the logged-in employee's userInfo document ID
-    const currentUserID = sessionStorage.getItem("userID");
+  const currentUserID = sessionStorage.getItem("userID");
 
-    if (!currentUserID) {
-        window.location.href = "login.html";
-        return;
-    }
+  if (!currentUserID) {
+      window.location.href = "login.html";
+      return;
+  }
 
-    // Get all weekly schedule documents
-    const snapshot = await getDocs(collection(db, "schedule"));
+  const showAllEmployees =
+    currentTitle === "Manager" &&
+    document.body.dataset.calendarView === "all";
 
-    console.log("Number of schedule documents:", snapshot.size);
+  const snapshot = await getDocs(collection(db, "schedule"));
 
-    const data = [];
+  console.log("Number of schedule documents:", snapshot.size);
 
-    // Weekday offsets, starting with Monday
-    const weekdayOffsets = {
-        Monday: 0,
-        Tuesday: 1,
-        Wednesday: 2,
-        Thursday: 3,
-        Friday: 4,
-        Saturday: 5,
-        Sunday: 6
-    };
+  const weekdayOffsets = {
+      Sunday: 0,
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6
+  };
 
-    for (const scheduleDoc of snapshot.docs) {
-        const scheduleData = scheduleDoc.data();
-        const weeklySchedule = scheduleData["schedule "];
+  // Collect assignments and unique document references first.
+  const assignments = [];
+  const shiftRefs = new Map();
+  const employeeRefs = new Map();
 
-        if (!weeklySchedule || !scheduleData.scheduleID) continue;
+  for (const scheduleDoc of snapshot.docs) {
+      const scheduleData = scheduleDoc.data();
+      const weeklySchedule = scheduleData.schedule;
 
-        // Get the date from scheduleID, such as "09/18/2026-1"
-        const datePart = scheduleData.scheduleID.split("-")[0];
+      if (!weeklySchedule || !scheduleData.scheduleID) continue;
 
-        // Find the Monday of that week
-        const weekStart = moment(datePart, "MM/DD/YYYY").startOf("isoWeek");
+      const weekStart = moment(
+          scheduleData.scheduleID,
+          "YYYY-MM-DD",
+          true
+      );
 
-        // Check each weekday
-        for (const day of Object.keys(weekdayOffsets)) {
-            const daySchedule = weeklySchedule[day];
+      if (!weekStart.isValid()) continue;
 
-            if (!daySchedule) continue;
+      for (const [day, offset] of Object.entries(weekdayOffsets)) {
+          const daySchedule = weeklySchedule[day];
 
-            // Check each shift slot, such as Shift1 and Shift2
-            for (const shiftKey of Object.keys(daySchedule)) {
-                const shift = daySchedule[shiftKey];
+          if (!daySchedule) continue;
 
-                if (!shift.Associate || !shift.ShiftID) continue;
+          const shiftDate = weekStart.clone().add(offset, "days");
 
-                // Only show shifts assigned to this employee
-                if (shift.Associate.path !== `userInfo/${currentUserID}`) {
-                    continue;
-                }
+          for (const shift of Object.values(daySchedule)) {
+              if (!shift?.Associate || !shift?.ShiftID) continue;
 
-                // Get the shift document
-                const shiftDoc = await getDoc(shift.ShiftID);
+              // Employees only need to load their own assignments.
+              if (
+                  !showAllEmployees &&
+                  shift.Associate.path !== `userInfo/${currentUserID}`
+              ) {
+                  continue;
+              }
 
-                if (!shiftDoc.exists()) continue;
+              assignments.push({
+                  shiftID: shift.ShiftID.id,
+                  shiftRef: shift.ShiftID,
+                  associateID: shift.Associate.id,
+                  associateRef: shift.Associate,
+                  date: shiftDate.clone()
+              });
 
-                const shiftDetails = shiftDoc.data();
-                const shiftTime = shiftDetails.ShiftTime;
+              shiftRefs.set(shift.ShiftID.path, shift.ShiftID);
 
-                if (!shiftTime) continue;
+              // Only the manager calendar displays employee names.
+              if (showAllEmployees) {
+                  employeeRefs.set(
+                      shift.Associate.path,
+                      shift.Associate
+                  );
+              }
+          }
+      }
+  }
 
-                // Calculate the actual date of this shift
-                const shiftDate = weekStart
-                    .clone()
-                    .add(weekdayOffsets[day], "days");
+  // Fetch all unique shift and employee documents in parallel.
+  const [shiftResults, employeeResults] = await Promise.all([
+      Promise.all(
+          Array.from(shiftRefs.entries()).map(async ([path, ref]) => {
+              const doc = await getDoc(ref);
+              return [path, doc];
+          })
+      ),
 
-                // Add the shift to the calendar
-                data.push({
-                    eventName:
-                        `${formatTime(shiftTime.StartTime)} - ${formatTime(shiftTime.EndTime)}`,
-                    calendar: "Work",
-                    color: "orange",
-                    date: shiftDate
-                });
-            }
-        }
-    }
+      Promise.all(
+          Array.from(employeeRefs.entries()).map(async ([path, ref]) => {
+              const doc = await getDoc(ref);
+              return [path, doc];
+          })
+      )
+  ]);
 
-    // Display the shifts
-    // new Calendar("#calendar", data);
-    
-    const calendar = new Calendar("#calendar", data);
+  const shiftDocuments = new Map(shiftResults);
+  const employeeDocuments = new Map(employeeResults);
 
-    const toggleButton = document.getElementById(
+  const data = [];
+
+  // Build calendar events using the fetched documents.
+  for (const assignment of assignments) {
+      const shiftDoc = shiftDocuments.get(
+          assignment.shiftRef.path
+      );
+
+      if (!shiftDoc?.exists()) continue;
+
+      const shiftDetails = shiftDoc.data();
+      const shiftTime = shiftDetails.ShiftTime;
+
+      if (!shiftTime) continue;
+
+      if (showAllEmployees) {
+          const employeeDoc = employeeDocuments.get(
+              assignment.associateRef.path
+          );
+
+          const employeeName = employeeDoc?.exists()
+              ? employeeDoc.data().Name || "Unknown Employee"
+              : "Unknown Employee";
+
+          data.push({
+              eventName:
+                  `${formatTime(shiftTime.StartTime)} - ` +
+                  `${formatTime(shiftTime.EndTime)} - ${employeeName}`,
+              calendar: "Work",
+              color: "blue",
+              date: assignment.date,
+              employeeID: assignment.associateID,
+              name: employeeName,
+              shiftID: assignment.shiftID
+          });
+      } else {
+          data.push({
+              eventName:
+                  `${formatTime(shiftTime.StartTime)} - ` +
+                  `${formatTime(shiftTime.EndTime)}`,
+              calendar: "Work",
+              color: "orange",
+              date: assignment.date
+          });
+      }
+  }
+
+  window.normalCalendarEvents = data;
+
+  window.scheduleCalendar = new Calendar("#calendar", data);
+
+  const toggleButton = document.getElementById(
       "toggleCalendarView"
-    );
+  );
 
-    if (toggleButton) {
+  if (toggleButton && !toggleButton.dataset.listenerAdded) {
+      toggleButton.dataset.listenerAdded = "true";
+
       toggleButton.addEventListener("click", function() {
-        calendar.toggleView();
+          window.scheduleCalendar.toggleView();
 
-        toggleButton.textContent =
-          calendar.view === "list"
-            ? "Switch to Calendar View"
-            : "Switch to List View";
+          toggleButton.textContent =
+              window.scheduleCalendar.view === "list"
+                  ? "Switch to Calendar View"
+                  : "Switch to List View";
       });
-    }
+  }
 }
-
+//this is the function that gets the schedule from the db
 async function loadOpenShifts() {
     const snapshot = await getDocs(collection(db, "OpenShifts"));
     const container = document.getElementById("shiftList");
@@ -631,11 +725,31 @@ async function loadOpenShifts() {
     }
 }
 
-function formatTime(hour) {
-    if (hour === 0) return "12 AM";
-    if (hour < 12) return `${hour} AM`;
-    if (hour === 12) return "12 PM";
-    return `${hour - 12} PM`;
+function formatTime(time) {
+
+  // Handle times stored as strings, such as "06:00" or "22:00".
+  if (typeof time === "string" && time.includes(":")) {
+
+      const [hours, minutes] = time.split(":").map(Number);
+
+      const period = hours >= 12 ? "PM" : "AM";
+      const displayHour = hours % 12 || 12;
+
+      return `${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
+  }
+
+  // Handle times stored as numbers, such as 6 or 22.
+  if (typeof time === "number") {
+
+      const period = time >= 12 ? "PM" : "AM";
+      const displayHour = time % 12 || 12;
+
+      return `${displayHour}:00 ${period}`;
+  }
+
+  console.warn("Unexpected shift time format:", time);
+
+  return String(time);
 }
 
 loadCalendarEvents();
