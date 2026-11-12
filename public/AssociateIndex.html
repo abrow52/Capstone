@@ -25,7 +25,6 @@
             <ul  id="navItems" style="display:flex; list-style-type: none; gap: 10px">
                 <li class="nav-item"><a class="nav-link" aria-current="page" href="/home">Home</a></li>
                 <li class="nav-item" id = "managerLink" style = "display:none;"><a class="nav-link" href="/hub">Scheduling Hub</a></li>
-                <li class="nav-item" id = "requestsLink" style = "display:none;"><a class="nav-link" href="/requests">Requests</a></li>
                 <li class="nav-item"><a class="nav-link" href="/dash">Employee Dashboard</a></li>
                 <li class="nav-item">
                   <button type="button" id="openMailbox" class="open-button" style="border:none; background:none; padding:0;">
@@ -38,7 +37,7 @@
       </div>
     </div>
   </header>
-  <body id="pageBody"> 
+  <body data-calendar-view="personal" id="pageBody"> 
     <!-- Mailbox overlay -->
     <div id="myForm" class="mailbox-overlay" style="display:none;">
       <div class="mailbox-window">
@@ -156,8 +155,18 @@
     const calendar = document.getElementById("calendar");
     const toggleButton = document.getElementById("toggleCalendarView");
 
+    // toggleButton.addEventListener("click", () => {
+    //   const isListView = calendar.classList.toggle("list-view");
+
+    //   toggleButton.textContent = isListView
+    //     ? "Switch to Calendar View"
+    //     : "Switch to List View";
+    // });
     toggleButton.addEventListener("click", () => {
       const isListView = calendar.classList.toggle("list-view");
+
+      console.log("List view active:", isListView);
+      console.log("Calendar classes:", calendar.className);
 
       toggleButton.textContent = isListView
         ? "Switch to Calendar View"

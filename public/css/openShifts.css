@@ -39,37 +39,3 @@
 .PickUpButton:hover{
   background-color: #f3f4f6;
 }
-
-#shiftRequests {
-    padding: 20px;
-}
-
-.requestCard {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-}
-
-.requestCard p {
-    margin: 5px 0;
-}
-
-.approveButton {
-    background-color: green;
-    color: white;
-    padding: 8px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.denyButton {
-    background-color: #dc3545;
-    color: white;
-    padding: 8px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}

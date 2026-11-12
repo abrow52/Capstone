@@ -1,12 +1,6 @@
 import { db } from "./firebase.js";
-import {collection, doc, setDoc, getDocs, where, query, addDoc, deleteDoc
+import {collection, doc, setDoc, getDocs, where, query
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-
-import { loadOpenShifts } from "./calendar.js";
-
-const currentUserID = sessionStorage.getItem("userID");
-const currentUserName = sessionStorage.getItem("Name");
-const currentTitle = sessionStorage.getItem("Title");
 
 async function loadUserRequests() {
     const currentUserID = sessionStorage.getItem("userID");
@@ -127,59 +121,5 @@ reqTimeOffForm.addEventListener("submit", async (event) => {
 //     
 // });
 
-// THIS IS FOR THE PICKUP SHIFT FUNCTIONALITY 
-const container = document.getElementById("shiftList");
-container.addEventListener("click", async function(event) {
 
- const button = event.target.closest(".PickUpButton");
-    if (!button) return;
-
-        const date = button.dataset.date;
-        const startTime = button.dataset.start;
-        const endTime = button.dataset.end;
-        const openShiftId = button.dataset.openShiftId;
-        const shiftId = button.dataset.shiftId;
-
-        const snapshot = await getDocs(collection(db, "ShiftRequests"));
-
-         for (const requestDoc of snapshot.docs) {
-            const request = requestDoc.data();
-                if (request.Date == openShiftId && request.StartTime == startTime && 
-                        request.EndTime == endTime && request.Status == "Pending") {
-                    alert("Shift was already requested");
-                    return; 
-                }
-         }
-
-        try {
-
-            await addDoc(collection(db, "ShiftRequests"), {
-                UserID: currentUserID,
-                Name: currentUserName,
-                Date: date,
-                StartTime: startTime,
-                EndTime: endTime,
-                Status: "Pending", 
-                shiftID: doc(db, "shifts", shiftId)
-            });
-
-            await deleteDoc(doc(db, "OpenShifts", openShiftId));
-
-            button.closest(".shiftInfo").remove();
-
-            alert("Pickup request submitted!");
-
-            button.disabled = true;
-            button.textContent = "Requested";
-
-        } catch (error) {
-
-            console.error("Error submitting pickup request:", error);
-            alert("Unable to submit pickup request.");
-
-        }
-});
-//---------------------------------------
-
-loadOpenShifts();
 loadUserRequests();
