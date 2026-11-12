@@ -14,6 +14,7 @@ const currentTitle = sessionStorage.getItem("Title");
 
 if(currentTitle === "Manager"){
     document.getElementById("managerLink").style.display = "block";
+    document.getElementById("requestsLink").style.display = "block";
   }
 
 if (currentUserName) {
@@ -589,7 +590,7 @@ async function loadCalendarEvents() {
     }
 }
 
-async function loadOpenShifts() {
+export async function loadOpenShifts() {
     const snapshot = await getDocs(collection(db, "OpenShifts"));
     const container = document.getElementById("shiftList");
 
@@ -605,6 +606,7 @@ async function loadOpenShifts() {
         if (!openShift.shiftID) continue;
 
         const shiftDoc = await getDoc(openShift.shiftID);
+        console.log("Shift document ID:", openShift.shiftID.id);
 
         if (!shiftDoc.exists()) continue;
 
@@ -612,6 +614,9 @@ async function loadOpenShifts() {
         const shiftTime = shiftDetails.ShiftTime;
 
         if (!shiftTime) continue;
+
+        const shiftId = shiftDoc.id;
+        console.log("Original shift ID:", shiftId);
 
         // Format the date and times
         const formattedDate = shiftDate.format("MMMM D, YYYY");
@@ -625,19 +630,28 @@ async function loadOpenShifts() {
                       <p>Date: ${formattedDate}</p>
                       <p>Time: ${startTime} - ${endTime}</p>
                     </div>
-                      <button class = "PickUpButton" type = "button"> Pick Up </button>
+                      <button class = "PickUpButton" type = "button"
+                      data-date="${openShift.Date}"
+                      data-start="${shiftTime.StartTime}"
+                      data-end="${shiftTime.EndTime}"
+                      data-open-shift-id="${openShiftDoc.id}"
+                      data-shift-id="${shiftId}">
+                      Pick Up </button>
                   </div>
         `;
     }
 }
 
-function formatTime(hour) {
+export function formatTime(time) {
+
+    const hour = parseInt(time.split(":")[0]);
+
     if (hour === 0) return "12 AM";
     if (hour < 12) return `${hour} AM`;
     if (hour === 12) return "12 PM";
+
     return `${hour - 12} PM`;
 }
 
 loadCalendarEvents();
-loadOpenShifts();
 
