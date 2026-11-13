@@ -3,9 +3,11 @@
   <link rel="stylesheet" href="css/calendar-grid.css">
   <link rel="stylesheet" href="css/universal.css" >
   <link rel="stylesheet" href="css/messages.css" >
+  <link rel="stylesheet" href="css/employeeDashboard.css">
   <script type="module" src="js/calendar.js"></script>
-  <script type="module" src="js/requests.js"></script>
   <script type="module" src="js/messages.js"></script>
+  <script type="module" src="js/addUser.js"></script>
+  <script type="module" src="js/employeeDashboard.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js"></script>
@@ -17,18 +19,20 @@
         <a class="navbar-brand d-flex align-items-center">
           <strong id="welcomeUsername"></strong>
         </a>
-        <div class="align-items-center">
-          <ul id="navItems" style="display:flex; list-style-type: none; gap: 10px">
-              <li class="nav-item"><a class="nav-link" href="/home">Home</a></li>
-              <li class="nav-item" id = "managerLink" style = "display:none;"><a class="nav-link" href="/hub">Scheduling Hub</a></li> 
-              <li class="nav-item" id = "requestsLink" style = "display:none;"><a class="nav-link" href="/requests">Requests</a></li>
-              <li class="nav-item"><a class="nav-link" aria-current="page" href="/dash">Employee Dashboard</a></li>
-              <li class="nav-item">
-                <button type="button" id="openMailbox" class="open-button" style="border:none; background:none; padding:0;">
-                    Mailbox
-                </button>
-              </li>
-          </ul>
+        <div id = "navBar">
+          <div class="align-items-center">
+            <ul  id="navItems" style="display:flex; list-style-type: none; gap: 10px">
+                <li class="nav-item"><a class="nav-link" href="/home">Home</a></li>
+                <li class="nav-item" id = "managerLink" style = "display:none;"><a class="nav-link" aria-current="page" href="/hub">Scheduling Hub</a></li>
+                <li class="nav-item" id = "requestsLink" style = "display:none;"><a class="nav-link" href="/requests">Requests</a></li>
+                <li class="nav-item"><a class="nav-link" href="/dash">Employee Dashboard</a></li>
+                <li class="nav-item">
+                  <button type="button" id="openMailbox" class="open-button" style="border:none; background:none; padding:0;">
+                      Mailbox
+                  </button>
+                </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -86,39 +90,145 @@
         </div>
       </div>
     </div>
-    <div class="col-md-6">
-      <button class="btn btn-primary" type="button" onclick="unhideForm()" style=" margin-left: 20px; margin-bottom: 20px;">Add Employee</button>
-      <form id="addUserForm" style="max-width: 500px; margin-left: 20px; display:none;">
-        <div class="mb-3">
-          <label for="newUserName" class="form-label">Employee Name</label>
-          <input type="text" class="form-control" id="newUserName"
-                 name="name" placeholder="Enter employee name" required>
+    <main class="dashboard">
+      <!-- Personal Information -->
+      <section class="dashboard-card">
+        <div>
+          <h2>
+              My Information
+              <button type="button" class="btn btn-primary" id="editMyInfo">
+                  Edit
+              </button>
+              <button type="button" class="btn btn-primary" id="editMyPass">
+                Change Password
+            </button>
+          </h2>
+  
+          <div id="myInformation">
+              <p>Loading your information...</p>
+          </div>
+  
+          <!-- Keep password changing separate -->
+          <div class="mb-3 col-3 hidden" id="changePassDiv">
+              <h3>Change Password</h3>
+  
+              <form id="changePasswordForm">
+                  <label for="currentPassword">Current Password:</label>
+                  <input type="password" id="currentPassword" required>
+  
+                  <label for="newPassword">New Password:</label>
+                  <input type="password" id="newPassword" required>
+  
+                  <label for="confirmPassword">Confirm New Password:</label>
+                  <input type="password" id="confirmPassword" required>
+                  <div>
+                    <button type="submit">Update Password</button> 
+                  </div>
+              </form>
+          </div>
         </div>
-      
-        <div class="mb-3">
-          <label for="newPassword" class="form-label">Password</label>
-          <input type="password" class="form-control" id="newPassword"
-                 name="password" placeholder="Enter password" required>
+        <div>
+          <section >
+            <h2>My Availability
+              <button type="button" class="btn btn-primary" id="editAvailability">
+                Update Availability
+              </button>
+            </h2>
+        
+            <!-- <div id="currentAvailability">
+              <p>Loading your availability...</p>
+            </div> -->
+            <div class="availability-container">
+              <div class="availability-column">
+                  <h4>Current Availability</h4>
+                  <div id="currentAvailability">
+                      <p>Loading your availability...</p>
+                  </div>
+              </div>
+          
+              <div class="availability-column">
+                  <h4>Future Availability Changes</h4>
+                  <div id="futureAvailability">
+                      <p>No scheduled changes.</p>
+                  </div>
+              </div>
+          </div>
+        
+            <!-- <button type="button" class="btn btn-primary" id="editAvailability">
+              Update Availability
+            </button> -->
+        
+            <form id="availabilityForm" style="display:none;">
+              <p>
+                Select the days and times you are available to work.
+                Unselected days will be saved as unavailable.
+              </p>
+        
+              <div id="availabilityDays"></div>
+        
+              <div class="mb-3 mt-3">
+                <label for="availabilityStartDate" class="form-label">
+                  Effective Start Date
+                </label>
+                <input type="date" class="form-control"
+                       id="availabilityStartDate" required>
+                <small class="text-muted">
+                  Changes must take effect at least 14 days from today.
+                </small>
+              </div>
+        
+              <button type="submit" class="btn btn-success">
+                Save Availability
+              </button>
+        
+              <button type="button" class="btn btn-secondary"
+                      id="cancelAvailabilityEdit">
+                Cancel
+              </button>
+            </form>
+          </section>
         </div>
-      
-        <div class="mb-3">
-          <label for="newTitle" class="form-label">Job Title</label>
-          <input type="text" class="form-control" id="newTitle"
-                 name="title" placeholder="Enter job title" required>
+      </section>
+    
+      <!-- Manager-only Employee Directory -->
+      <section id="employeeDirectorySection" class="dashboard-card"
+               style="display:none;">
+        <h2>Employee Information <button class="btn btn-primary" type="button" onclick="unhideForm()" style=" margin-left: 20px; margin-bottom: 20px;">Add Employee</button></h2>
+        <form id="addUserForm" style="max-width: 500px; margin-left: 20px; display:none;">
+          <div class="mb-3">
+            <label for="newUserName" class="form-label">Employee Name</label>
+            <input type="text" class="form-control" id="newUserName"
+                   name="name" placeholder="Enter employee name" required>
+          </div>
+        
+          <!-- <div class="mb-3">
+            <label for="newPassword" class="form-label">Password</label>
+            <input type="password" class="form-control" id="newPassword"
+                   name="password" placeholder="Enter password" required>
+          </div> -->
+        
+          <div class="mb-3">
+            <label for="newTitle" class="form-label">Job Title</label>
+            <input type="text" class="form-control" id="newTitle"
+                   name="title" placeholder="Enter job title" required>
+          </div>
+        
+          <div class="mb-3">
+            <label for="newEmail" class="form-label">Email</label>
+            <input type="email" class="form-control" id="newEmail"
+                   name="email" placeholder="Enter email" required>
+          </div>
+          <div style="gap: 100px;">
+            <button type="submit">Submit</button>
+            <button onclick="hideForm()">Cancel</button>
+          </div>
+        </form>
+        <div id="employeeDirectory">
+          <p>Loading employees...</p>
         </div>
-      
-        <div class="mb-3">
-          <label for="newEmail" class="form-label">Email</label>
-          <input type="email" class="form-control" id="newEmail"
-                 name="email" placeholder="Enter email" required>
-        </div>
-        <div style="gap: 100px;">
-          <button type="submit">Submit</button>
-          <button onclick="hideForm()">Cancel</button>
-        </div>
-      </form>
-    </div>
-    <script type="module" src="./addUser.js"></script>
+      </section>
+    
+    </main>
     <script>
       function unhideForm() {
           document.getElementById("addUserForm").style.display = "block";

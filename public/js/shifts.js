@@ -112,56 +112,6 @@ async function loadSavedAssignments() {
 
     savedAssignments = newAssignments;
 }
-// async function loadSavedAssignments() {
-//     savedAssignments.clear();
-
-//     const snapshot = await getDocs(collection(db, "schedule"));
-
-//     const weekdayOffsets = {
-//         Sunday: 0,
-//         Monday: 1,
-//         Tuesday: 2,
-//         Wednesday: 3,
-//         Thursday: 4,
-//         Friday: 5,
-//         Saturday: 6
-//     };
-
-//     for (const scheduleDoc of snapshot.docs) {
-//         const scheduleData = scheduleDoc.data();
-//         const weeklySchedule = scheduleData.schedule || {};
-
-//         const weekStart = moment(
-//             scheduleData.scheduleID || scheduleDoc.id,
-//             "YYYY-MM-DD",
-//             true
-//         );
-
-//         if (!weekStart.isValid()) continue;
-
-//         for (const [dayName, offset] of Object.entries(weekdayOffsets)) {
-//             const daySchedule = weeklySchedule[dayName] || {};
-//             const shiftDate = weekStart.clone().add(offset, "days");
-
-//             for (const slot of Object.values(daySchedule)) {
-//                 if (!slot?.ShiftID || !slot?.Associate) continue;
-
-//                 const employeeDoc = await getDoc(slot.Associate);
-//                 if (!employeeDoc.exists()) continue;
-
-//                 const employeeData = employeeDoc.data();
-
-//                 savedAssignments.set(
-//                     getShiftKey(slot.ShiftID.id, shiftDate),
-//                     {
-//                         employeeID: slot.Associate.id,
-//                         employeeName: employeeData.Name || "Unknown Employee"
-//                     }
-//                 );
-//             }
-//         }
-//     }
-// }
 
 // used in doc ids
 const weekdays = {
@@ -1159,39 +1109,6 @@ async function saveSchedule() {
                     };
 
                     weeklySchedule[dayName] = daySchedule;
-                    // // Find this shift's existing slot, if it has one.
-                    // let slotName = Object.keys(daySchedule).find(key =>
-                    //     daySchedule[key]?.ShiftID?.path === shiftRef.path
-                    // );
-
-                    // // Otherwise find the next unused slot.
-                    // if (!slotName) {
-                    //     let number = 1;
-
-                    //     while (daySchedule[`Shift${number}`]) {
-                    //         number++;
-                    //     }
-
-                    //     slotName = `Shift${number}`;
-                    // }
-
-                    // const existingAssignment = daySchedule[slotName];
-
-                    // if (
-                    //     existingAssignment?.Associate &&
-                    //     existingAssignment.Associate.path !== employeeRef.path
-                    // ) {
-                    //     throw new Error(
-                    //         `The ${assignment.shiftID} shift on ${dayName} has already been assigned to someone else.`
-                    //     );
-                    // }
-
-                    // daySchedule[slotName] = {
-                    //     Associate: employeeRef,
-                    //     ShiftID: shiftRef
-                    // };
-
-                    // weeklySchedule[dayName] = daySchedule;
                 });
 
                 transaction.set(scheduleRef, {
@@ -1218,13 +1135,6 @@ async function saveSchedule() {
         pendingAssignments = [];
 
         alert("Schedule saved successfully!");
-        // Only clear drafts after every weekly save succeeds.
-        // pendingAssignments = [];
-
-        // alert("Schedule saved successfully!");
-
-        // // Refresh the calendar.
-        // drawSchedulingEvents();
 
     } catch (error) {
         console.error("Error saving schedule:", error);

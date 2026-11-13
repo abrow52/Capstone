@@ -1,0 +1,128 @@
+.hidden{
+    display: none;
+}
+
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    /* max-width: 1200px; */
+    max-width: 95vw;
+    margin: 25px auto;
+    padding: 0 20px;
+}
+
+.dashboard-card {
+    width: 100%;
+    padding: 25px;
+    background-color: white;
+    border-radius: 8px;
+    color: black;
+    box-shadow: 0px 0px 10px 4px rgb(80, 78, 78);
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+}
+
+.dashboard-card h2 {
+    border-bottom: 1px solid rgb(64, 69, 70);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+}
+
+.dashboard-card > div {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.dashboard-card > div:first-child {
+    flex: 0 0 45%;
+}
+
+.dashboard-card > div:last-child {
+    flex: 1;
+}
+
+#employeeDirectory{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.employeeInfo {
+    padding: 15px;
+    margin-bottom: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9fafb;
+}
+
+.employeeInfo p {
+    margin: 6px 0;
+}
+
+.availabilityDay {
+    display: grid;
+    grid-template-columns: 130px 1fr 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.availabilityDay input[type="time"] {
+    width: 100%;
+    min-width: 0;
+}
+
+.availability-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    align-items: start;
+    width: 100%;
+}
+
+.availability-column {
+    min-width: 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: white;
+}
+
+.futureAvailabilityCard {
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+}
+
+#changePassDiv {
+    width: 100%;
+    max-width: 450px;
+    margin-top: 20px;
+}
+
+#changePassDiv input {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .availability-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .availabilityDay {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .availabilityDay label {
+        grid-column: 1 / -1;
+    }
+}
