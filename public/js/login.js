@@ -42,6 +42,7 @@ loginForm.addEventListener("submit", async (event) => {
             }
 
             // Retrieve the employee's userInfo document
+            console.log("LOGIN DEBUG VERSION 123");
             console.log("User document ID:", userDocID);
             console.log("User document ID type:", typeof userDocID);
             
