@@ -42,7 +42,16 @@ loginForm.addEventListener("submit", async (event) => {
             }
 
             // Retrieve the employee's userInfo document
-            const userDoc = await getDoc(doc(db, "userInfo", userDocID));
+            console.log("User document ID:", userDocID);
+            console.log("User document ID type:", typeof userDocID);
+            
+            const userReference = doc(db, "userInfo", userDocID);
+            
+            console.log("Document reference:", userReference);
+            console.log("Reference type:", userReference?.type);
+            console.log("Reference path:", userReference?.path);
+            
+            const userDoc = await getDoc(userReference);
 
             if (!userDoc.exists()) {
                 console.error("User document not found:", userDocID);
