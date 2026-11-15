@@ -36,7 +36,7 @@ if (currentUserName) {
     this.drawHeader();
 
     if (this.view === 'list') {
-      // Remove the traditional month grid
+      // remove calendar grid
       if (this.month) {
         this.month.remove();
         this.month = null;
@@ -209,10 +209,6 @@ if (currentUserName) {
         return memo;
       }, []);
 
-      // todaysEvents.forEach(function(ev) {
-      //   var evSpan = createElement('span', ev.color);
-      //   element.appendChild(evSpan);
-      // });
       todaysEvents.forEach(function(ev) {
           var evSpan = createElement('div', 'calendar-event');
       
@@ -244,9 +240,9 @@ if (currentUserName) {
     }
   }
 
-
+  //draw the calendar list view
   Calendar.prototype.drawAgenda = function() {
-    // Rebuild the list whenever the month changes
+    // remake the list whenever the month changes
     if (this.agenda) {
       this.agenda.remove();
     }
@@ -262,6 +258,7 @@ if (currentUserName) {
 
       if (day.isSame(today, 'day')) {
         row.classList.add('is-today');
+        row.id = 'today-agenda-row';
       }
 
       // Left column: date
@@ -330,9 +327,17 @@ if (currentUserName) {
     }
 
     this.el.appendChild(this.agenda);
+    const todayRow = this.agenda.querySelector('#today-agenda-row');
+
+    if (todayRow) {
+        todayRow.scrollIntoView({
+            block: 'start',
+            behavior: 'auto'
+        });
+    }
   };
 
-
+  //toggle button
   Calendar.prototype.toggleView = function() {
     this.view = this.view === 'list' ? 'calendar' : 'list';
 
@@ -354,70 +359,6 @@ if (currentUserName) {
     }
     return classes.join(' ');
   }
-
-  // Calendar.prototype.openDay = function(el) {
-  //   var details, arrow;
-  //   var dayNumber = +el.querySelectorAll('.day-number')[0].innerText || +el.querySelectorAll('.day-number')[0].textContent;
-  //   var day = this.current.clone().date(dayNumber);
-
-  //   var currentOpened = document.querySelector('.details');
-
-  //   //Check to see if there is an open detais box on the current row
-  //   if(currentOpened && currentOpened.parentNode === el.parentNode) {
-  //       //   details = currentOpened;
-  //       //   arrow = document.querySelector('.arrow');
-  //       // Close the dropdown when clicking the same day again
-  //       currentOpened.className = 'details out';
-
-  //       currentOpened.addEventListener('animationend', function() {
-  //           if (currentOpened.parentNode) {
-  //               currentOpened.parentNode.removeChild(currentOpened);
-  //           }
-  //   });
-
-  //   return;
-  //   } else {
-  //     //Close the open events on differnt week row
-  //     //currentOpened && currentOpened.parentNode.removeChild(currentOpened);
-  //     if(currentOpened) {
-  //       currentOpened.addEventListener('webkit                AnimationEnd', function() {
-  //         currentOpened.parentNode.removeChild(currentOpened);
-  //       });
-  //       currentOpened.addEventListener('oanimationend', function() {
-  //         currentOpened.parentNode.removeChild(currentOpened);
-  //       });
-  //       currentOpened.addEventListener('msAnimationEnd', function() {
-  //         currentOpened.parentNode.removeChild(currentOpened);
-  //       });
-  //       currentOpened.addEventListener('animationend', function() {
-  //         currentOpened.parentNode.removeChild(currentOpened);
-  //       });
-  //       currentOpened.className = 'details out';
-  //     }
-
-  //     //Create the Details Container
-  //     details = createElement('div', 'details in');
-
-  //     //Create the arrow
-  //     var arrow = createElement('div', 'arrow');
-
-  //     //Create the event wrapper
-
-  //     details.appendChild(arrow);
-  //     el.parentNode.appendChild(details);
-  //   }
-
-  //   var todaysEvents = this.events.reduce(function(memo, ev) {
-  //     if(ev.date.isSame(day, 'day')) {
-  //       memo.push(ev);
-  //     }
-  //     return memo;
-  //   }, []);
-
-  //   this.renderEvents(todaysEvents, details);
-
-  //   arrow.style.left = el.offsetLeft - el.parentNode.offsetLeft + 40 + 'px';
-  // }
 
   Calendar.prototype.renderEvents = function(events, ele) {
     //Remove any events in the current details element
@@ -465,11 +406,7 @@ if (currentUserName) {
     }
   }
 
-  // Calendar.prototype.nextMonth = function() {
-  //   this.current.add('months', 1);
-  //   this.next = true;
-  //   this.draw();
-  // }
+
   Calendar.prototype.nextMonth = function() {
     this.current.add('months', 1);
     this.next = true;
@@ -481,11 +418,6 @@ if (currentUserName) {
     this.draw();
   }
 
-  // Calendar.prototype.prevMonth = function() {
-  //   this.current.subtract('months', 1);
-  //   this.next = false;
-  //   this.draw();
-  // }
   Calendar.prototype.prevMonth = function() {
     this.current.subtract('months', 1);
     this.next = false;
@@ -511,6 +443,7 @@ if (currentUserName) {
   }
 }();
 
+//display shifts
 async function loadCalendarEvents() {
   const currentUserID = sessionStorage.getItem("userID");
 
@@ -537,7 +470,7 @@ async function loadCalendarEvents() {
       Saturday: 6
   };
 
-  // Collect assignments and unique document references first.
+  //collect neccessary info
   const assignments = [];
   const shiftRefs = new Map();
   const employeeRefs = new Map();
@@ -566,7 +499,7 @@ async function loadCalendarEvents() {
           for (const shift of Object.values(daySchedule)) {
               if (!shift?.Associate || !shift?.ShiftID) continue;
 
-              // Employees only need to load their own assignments.
+              // employees only load their info
               if (
                   !showAllEmployees &&
                   shift.Associate.path !== `userInfo/${currentUserID}`
@@ -584,7 +517,7 @@ async function loadCalendarEvents() {
 
               shiftRefs.set(shift.ShiftID.path, shift.ShiftID);
 
-              // Only the manager calendar displays employee names.
+              // manager can see all employees
               if (showAllEmployees) {
                   employeeRefs.set(
                       shift.Associate.path,
@@ -595,7 +528,7 @@ async function loadCalendarEvents() {
       }
   }
 
-  // Fetch all unique shift and employee documents in parallel.
+  // get unique shift and employee docs
   const [shiftResults, employeeResults] = await Promise.all([
       Promise.all(
           Array.from(shiftRefs.entries()).map(async ([path, ref]) => {
@@ -617,7 +550,7 @@ async function loadCalendarEvents() {
 
   const data = [];
 
-  // Build calendar events using the fetched documents.
+  // create events/shifts
   for (const assignment of assignments) {
       const shiftDoc = shiftDocuments.get(
           assignment.shiftRef.path
@@ -683,7 +616,8 @@ async function loadCalendarEvents() {
       });
   }
 }
-//this is the function that gets the schedule from the db
+
+//display open shifts
 export async function loadOpenShifts() {
     const snapshot = await getDocs(collection(db, "OpenShifts"));
     const container = document.getElementById("shiftList");
@@ -737,21 +671,18 @@ export async function loadOpenShifts() {
 }
 
 export function formatTime(time) {
-
-  // Handle times stored as strings, such as "06:00" or "22:00".
+  // Handle times stored as strings
   if (typeof time === "string" && time.includes(":")) {
 
       const [hours, minutes] = time.split(":").map(Number);
-
       const period = hours >= 12 ? "PM" : "AM";
       const displayHour = hours % 12 || 12;
 
       return `${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
   }
 
-  // Handle times stored as numbers, such as 6 or 22.
+  // Handle times stored as numbers.
   if (typeof time === "number") {
-
       const period = time >= 12 ? "PM" : "AM";
       const displayHour = time % 12 || 12;
 

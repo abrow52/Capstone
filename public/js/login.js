@@ -1,12 +1,6 @@
 // Login JS
 import { db } from "./firebase.js";
-
-import {
-    collection,
-    getDocs,
-    getDoc,
-    doc
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import {collection, getDocs, getDoc, doc} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const loginForm = document.getElementById("login");
 const error = document.getElementById("error");

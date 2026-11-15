@@ -44,12 +44,9 @@
       <div class="mailbox-window">
         <div class="mailbox-header">
           <h2>Mailbox</h2>
-          <!-- <button type="button" id="showCompose" class="btn btn-primary">
-            Compose Message
-          </button> -->
           <button type="button" id="closeMailbox">✕</button>
         </div>
-        <!-- INBOX VIEW -->
+        <!-- inbox view -->
         <div id="inboxView">
           <button type="button" id="showCompose" class="btn btn-primary">
             Compose Message
@@ -57,7 +54,7 @@
           <h5>Inbox</h5>
           <div id="mail"></div>
         </div>
-        <!-- READ MESSAGE VIEW -->
+        <!-- read message view -->
         <div id="readMessageView" style="display:none;">
           <button type="button" id="backToInbox" class="btn btn-secondary">
             ← Back to Inbox
@@ -69,7 +66,7 @@
             <button type="submit" class="btn btn-primary">Send Reply</button>
           </form>
         </div>
-        <!-- COMPOSE MESSAGE VIEW -->
+        <!-- compose message view -->
         <div id="composeView" style="display:none;">
           <button type="button" id="backFromCompose" class="btn btn-secondary">
             ← Back to Inbox
@@ -92,24 +89,43 @@
       </div>
     </div>
     <div id = "home"> 
-       <!-- left column -->
+       <!-- left column : calendar -->
       <div class="calendar-section">
           <button id="toggleCalendarView" type="button">
               Switch to List View
           </button>
           <div id="calendar"></div>
       </div>
-      <!-- Right column -->
+      <!-- Right column : sidebar -->
       <div class="sidebar">
+          <!-- requests section -->
           <div class="requests">
               <h5>
                   Requests
                   <div id="reqFormBtn">
-                    <button>Drop Shift</button>
-                    <button onclick="unhideForm()">Time Off</button>
+                    <button type="button" id="showDropShiftForm">
+                        Drop Shift
+                    </button>
+                    <button type="button" id="showTimeOffForm">
+                        Time Off
+                    </button>
                   </div>
               </h5>
               <div class="card">
+                <!-- drop shift -->
+                <form id="reqDropShiftForm" style="display:none;">
+                  <h3>Request to Drop a Shift</h3>
+              
+                  <p>Select the shift you would like to drop:</p>
+              
+                  <div id="myAssignedShifts">
+                      Loading your shifts...
+                  </div>
+              
+                  <button type="submit">Submit Drop Request</button>
+                  <button type="button" id="cancelDropShift">Cancel</button>
+                </form>
+                <!-- time off -->
                 <form id="reqTimeOffForm" style="display:none;">
                   <h3>Request time off</h3>
                   <label for="leaveType">Leave type</label>
@@ -130,7 +146,7 @@
                     </div>
                   </div>
                   <button type="submit">Submit Request</button>
-                  <button onclick="hideForm()">Cancel</button>
+                  <button type="button" id="cancelTimeOff">Cancel</button>
                 </form>
               </div>
               <div>
@@ -151,18 +167,10 @@
       </div>
     </div>
   </body>
-  
   <script>
     const calendar = document.getElementById("calendar");
     const toggleButton = document.getElementById("toggleCalendarView");
 
-    // toggleButton.addEventListener("click", () => {
-    //   const isListView = calendar.classList.toggle("list-view");
-
-    //   toggleButton.textContent = isListView
-    //     ? "Switch to Calendar View"
-    //     : "Switch to List View";
-    // });
     toggleButton.addEventListener("click", () => {
       const isListView = calendar.classList.toggle("list-view");
 
@@ -176,12 +184,6 @@
 
   </script>
   <script>
-    function unhideForm() {
-        document.getElementById("reqTimeOffForm").style.display = "block";
-    }
-    function hideForm() {
-        document.getElementById("reqTimeOffForm").style.display = "none";
-    }
     function openForm() {
         document.getElementById("myForm").style.display = "block";
     }
