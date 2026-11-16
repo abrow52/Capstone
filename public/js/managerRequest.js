@@ -1,6 +1,6 @@
 import { db } from "./firebase.js";
 
-import {collection, getDocs, updateDoc, doc, addDoc, deleteDoc} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import {collection, getDocs, updateDoc, doc, addDoc, deleteDoc, getDoc, writeBatch} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { formatTime } from "./calendar.js";
 
 //logged-in user information
@@ -47,10 +47,64 @@ async function ManagerloadShiftRequests() {
         approveButton.addEventListener("click", async function() {
 
              try {
+                const associateRef = doc(db, "userInfo", request.UserID);
+
+                const shiftRef = typeof request.shiftID === "string"
+                    ? doc(db, "shifts", request.shiftID)
+                    : request.shiftID;
+
+                // Find which week this shift belongs to
+                const weekStart = moment(request.Date, "MM/DD/YYYY")
+                    .startOf("week")
+                    .format("YYYY-MM-DD");
+
+                // Get that week's schedule document
+                const scheduleRef = doc(db, "schedule", weekStart);
+                const scheduleSnapshot = await getDoc(scheduleRef);
+
+                if (!scheduleSnapshot.exists()) {
+                    alert("The weekly schedule could not be found.");
+                    return;
+                }
+
+                // Get the weekday name
+                const dayName = moment(request.Date, "MM/DD/YYYY").format("dddd");
+
+                // Get that day's shifts
+                const scheduleData = scheduleSnapshot.data().schedule || {};
+                const daySchedule = scheduleData[dayName] || {};
+
+                const shiftKeys = Object.keys(daySchedule)
+                    .filter(key => /^Shift\d+$/.test(key))
+                    .sort((a, b) => Number(a.replace("Shift", "")) - Number(b.replace("Shift", "")));
+
+                let slotName = shiftKeys.find(key =>
+                    !daySchedule[key]?.Associate && !daySchedule[key]?.ShiftID
+                );
+
+                if (!slotName) {
+                    const nextNumber = shiftKeys.length > 0
+                        ? Math.max(...shiftKeys.map(key => Number(key.replace("Shift", "")))) + 1
+                        : 1;
+
+                    slotName = `Shift${nextNumber}`;
+                }
+
+                const batch = writeBatch(db);
+
+                // Add the associate and shift to the weekly schedule
+                batch.update(scheduleRef, {
+                    [`schedule.${dayName}.${slotName}`]: {
+                        Associate: associateRef,
+                        ShiftID: shiftRef
+                    }
+                });
 
                 await updateDoc(doc(db, "ShiftRequests", requestDoc.id), {
                     Status: "Approved"
                 });
+
+                await batch.commit();
 
                 alert("Request approved!");
 
