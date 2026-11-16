@@ -44,12 +44,9 @@
       <div class="mailbox-window">
         <div class="mailbox-header">
           <h2>Mailbox</h2>
-          <!-- <button type="button" id="showCompose" class="btn btn-primary">
-            Compose Message
-          </button> -->
           <button type="button" id="closeMailbox">✕</button>
         </div>
-        <!-- INBOX VIEW -->
+        <!-- inbox view -->
         <div id="inboxView">
           <button type="button" id="showCompose" class="btn btn-primary">
             Compose Message
@@ -57,7 +54,7 @@
           <h5>Inbox</h5>
           <div id="mail"></div>
         </div>
-        <!-- READ MESSAGE VIEW -->
+        <!-- read message view -->
         <div id="readMessageView" style="display:none;">
           <button type="button" id="backToInbox" class="btn btn-secondary">
             ← Back to Inbox
@@ -69,7 +66,7 @@
             <button type="submit" class="btn btn-primary">Send Reply</button>
           </form>
         </div>
-        <!-- COMPOSE MESSAGE VIEW -->
+        <!-- compose message view -->
         <div id="composeView" style="display:none;">
           <button type="button" id="backFromCompose" class="btn btn-secondary">
             ← Back to Inbox
@@ -92,7 +89,7 @@
       </div>
     </div>
     <div id = "home"> 
-       <!-- left column -->
+       <!-- left column : calendar -->
       <div class="calendar-section">
           <div class="calendarBtns">
             <button id="toggleCalendarView" type="button">
@@ -104,7 +101,7 @@
           </div>
           <div id="calendar"></div>
       </div>
-      <!-- Right column -->
+      <!-- Right column : sidebar -->
       <div class="sidebar">
         <div class="schedule">
           <div id="createbtn">
@@ -113,10 +110,9 @@
               </button>
           
               <button id="createScheduleBtn" type="button">
-                  Create Schedule
+                  Create/Edit Schedule
               </button>
           </div>
-          
           <!-- Schedule creation controls -->
           <div id="scheduleModeControls" style="display:none;">
               <h5>Creating Schedule</h5>
@@ -137,16 +133,14 @@
                   Save Schedule
                 </button>
               </div>
-              <!-- <h5>Creating Schedule</h5>
-              <p>Select a shift on the calendar to begin assigning employees.</p> -->
-          
               <button id="exitScheduleMode" type="button">
                   Exit Schedule Creation
               </button>
           </div>
           <div class="card" id="shiftCard">
+            <!-- create shifts -->
             <form id="shiftsbtn" style="display:none;">
-              <h3>Create Shifts</h3>
+              <h3>Create/Edit Shifts</h3>
               <label for="shiftType">Shift type</label>
               <select id="shiftType" name="shiftType" required="">
                 <option value="">Select type</option>
@@ -155,26 +149,41 @@
                 <option value="Night">Night</option>
               </select>
               <div class="row">
-                <div>
-                  <label for="startTime">Start Time</label>
-                  <input type="time" id="startTime" name="startTime" required="">
+                <div class="shiftTimes">
+                  <div>
+                    <label for="startTime">Start Time</label>
+                    <input type="time" id="startTime" name="startTime" required="">
+                  </div>
+                  <div>
+                    <label for="endTime">End Time</label>
+                    <input type="time" id="endTime" name="endTime" required="">
+                </div>
+                </div>
+                <div class="shiftDates">
+                  <div>
+                    <label for="shiftStartDate">Start Date:</label>
+                    <input type="date" id="shiftStartDate" required>
+                  </div>
+                  <div>
+                    <label for="shiftEndDate">End Date (optional):</label>
+                    <input type="date" id="shiftEndDate">
+                  </div>
                 </div>
                 <div>
-                  <label for="endTime">End Time</label>
-                  <input type="time" id="endTime" name="endTime" required="">
+                  <label for="shiftQuantity">Number of shifts to create</label>
+                  <input type="number" id="shiftQuantity" name="shiftQuantity" min="1" step="1" value="1" required>
                 </div>
-                <div>
-                  <label for="shiftDays">Repeat Shift</label>
-                  <select id="shiftDays" name="shiftDays" multiple required>
-                    <option value="">Select type</option>
-                    <option value="Sunday">Sunday</option>
-                    <option value="Monday">Monday</option>
-                    <option value="Tuesday">Tuesday</option>
-                    <option value="Wednesday">Wednesday</option>
-                    <option value="Thursday">Thursday</option>
-                    <option value="Friday">Friday</option>
-                    <option value="Saturday">Saturday</option>
-                  </select>
+                <div class="repeat-shift">
+                  <label>Repeat Shift</label>
+                  <div id="shiftDays">
+                      <label><input type="checkbox" name="shiftDays" value="Sunday">Sunday</label>
+                      <label><input type="checkbox" name="shiftDays" value="Monday">Monday</label>
+                      <label><input type="checkbox" name="shiftDays" value="Tuesday">Tuesday</label>
+                      <label><input type="checkbox" name="shiftDays" value="Wednesday">Wednesday</label>
+                      <label><input type="checkbox" name="shiftDays" value="Thursday">Thursday</label>
+                      <label><input type="checkbox" name="shiftDays" value="Friday">Friday</label>
+                      <label><input type="checkbox" name="shiftDays" value="Saturday">Saturday</label>
+                  </div>
                 </div>
               </div>
               <button type="submit">Save Shifts</button>

@@ -1,13 +1,10 @@
 import { db } from "./firebase.js";
 
 import {
-    collection, getDocs, getDoc, query, where, 
-    addDoc, updateDoc, deleteDoc, doc, Timestamp
+    collection, getDocs, getDoc, query, where, addDoc, updateDoc, deleteDoc, doc, Timestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-// --------------------------------------------------
-// CURRENT USER
-// --------------------------------------------------
+import { formatShiftTime } from "./shifts.js";
 
 const currentUserID = sessionStorage.getItem("userID");
 const currentTitle = sessionStorage.getItem("Title");
@@ -26,7 +23,6 @@ function getLinkedUserID(value) {
         return value;
     }
 
-    // Handle Firestore DocumentReference fields
     if (value && typeof value.path === "string") {
         return value.path.startsWith("userInfo/")
             ? value.path.substring("userInfo/".length)
@@ -42,16 +38,13 @@ let currentContactInfo;
 let currentContactDocID;
 let availabilityRecords = [];
 
-// --------------------------------------------------
-// LOAD DASHBOARD
-// --------------------------------------------------
-
+//load dashboard
 async function loadDashboard() {
     try {
-        // Session userID is the actual Firestore document ID
+        // Session userID is doc id
         currentUserDocID = currentUserID;
 
-        // Retrieve the user's document directly
+        // get users doc
         const userDoc = await getDoc(
             doc(db, "userInfo", currentUserDocID)
         );
@@ -61,12 +54,8 @@ async function loadDashboard() {
         }
 
         currentUserInfo = userDoc.data();
-
-        // Find contact information using the userInfo document ID
         const userRef = doc(db, "userInfo", currentUserDocID);
-
-        // Get contact information (try both string and reference IDs)
-        // Retrieve all contact records and match by linked user document ID
+        //get contact info
         const contactSnapshot = await getDocs(contactCollection);
 
         const matchingContacts = contactSnapshot.docs.filter(contactDoc => {
@@ -88,7 +77,7 @@ async function loadDashboard() {
         console.log("Matching contact records:", matchingContacts.length);
         console.log("Current contact information:", currentContactInfo);
 
-        // Get availability (try both string and reference IDs)
+        // get users availability
         const [availabilityStringSnapshot, availabilityRefSnapshot] =
             await Promise.all([
                 getDocs(query(
@@ -113,8 +102,6 @@ async function loadDashboard() {
             ...item.data()
         }));
 
-        console.log("Contact information:", currentContactInfo);
-        console.log("Availability records:", availabilityRecords);
         displayMyInformation();
         displayAvailability();
 
@@ -134,18 +121,11 @@ async function loadDashboard() {
     }
 }
 
-// --------------------------------------------------
-// DISPLAY PERSONAL INFORMATION
-// --------------------------------------------------
-
-// --------------------------------------------------
-// DISPLAY AND EDIT PERSONAL INFORMATION
-// --------------------------------------------------
-
+//display and edit info
 const editMyInfoBtn = document.getElementById("editMyInfo");
 const myInformationContainer = document.getElementById("myInformation");
 
-// Display normal employee information
+// display employee information
 function displayMyInformation() {
     myInformationContainer.innerHTML = "";
 
@@ -171,7 +151,6 @@ function displayMyInformation() {
     });
 }
 
-// Turn displayed information into editable fields
 function editMyInformation() {
     myInformationContainer.innerHTML = "";
 
@@ -181,11 +160,6 @@ function editMyInformation() {
             id: "editName",
             value: currentUserInfo.Name,
             required: true
-        },
-        {
-            label: "Address",
-            id: "editAddress",
-            value: currentContactInfo.Address
         },
         {
             label: "Email",
@@ -198,6 +172,11 @@ function editMyInformation() {
             id: "editPhone",
             value: currentContactInfo.PhoneNumber,
             type: "tel"
+        },
+        {
+            label: "Address",
+            id: "editAddress",
+            value: currentContactInfo.Address
         }
     ];
 
@@ -224,23 +203,22 @@ function editMyInformation() {
         editForm.appendChild(wrapper);
     });
 
-    // Save button
+    // save btn
     const saveButton = document.createElement("button");
     saveButton.type = "submit";
     saveButton.className = "btn btn-success me-2";
     saveButton.textContent = "Save Changes";
 
-    // Cancel button
+    // cancel btn
     const cancelButton = document.createElement("button");
     cancelButton.type = "button";
     cancelButton.className = "btn btn-secondary";
     cancelButton.textContent = "Cancel";
 
     editForm.append(saveButton, cancelButton);
-
     myInformationContainer.appendChild(editForm);
 
-    // Cancel editing
+    // stop editing
     cancelButton.addEventListener("click", () => {
         displayMyInformation();
         editMyInfoBtn.style.display = "inline-block";
@@ -266,13 +244,13 @@ function editMyInformation() {
                 return;
             }
 
-            // Update name in userInfo
+            // update name
             await updateDoc(
                 doc(db, "userInfo", currentUserDocID),
                 { Name: newName }
             );
 
-            // Update or create contact information
+            // update or create contact info
             if (currentContactDocID) {
                 await updateDoc(
                     doc(db, "EmployeeContact", currentContactDocID),
@@ -287,13 +265,11 @@ function editMyInformation() {
                 currentContactDocID = newContactDoc.id;
             }
 
-            // Update local information
             currentUserInfo.Name = newName;
             currentContactInfo = newContact;
 
             sessionStorage.setItem("Name", newName);
 
-            // Return to normal display
             displayMyInformation();
             editMyInfoBtn.style.display = "inline-block";
 
@@ -312,7 +288,6 @@ editMyInfoBtn.addEventListener("click", () => {
     editMyInformation();
 });
 
-
 const editMyPassBtn = document.getElementById("editMyPass");
 
 //change password
@@ -327,19 +302,17 @@ if (changePasswordForm) {
             const newPassword = document.getElementById("newPassword").value;
             const confirmPassword = document.getElementById("confirmPassword").value;
 
-            // Check that the current user ID exists
+            // check that user exists
             if (!currentUserID) {
                 alert("Could not identify the logged-in user. Please log in again.");
                 return;
             }
 
-            // Check current password
             if (currentPassword !== currentUserInfo.Password) {
                 alert("Your current password is incorrect.");
                 return;
             }
 
-            // Check new passwords match
             if (newPassword !== confirmPassword) {
                 alert("Your new passwords do not match.");
                 return;
@@ -350,7 +323,6 @@ if (changePasswordForm) {
                 return;
             }
 
-            // Update the correct userInfo document
             await updateDoc(
                 doc(db, "userInfo", currentUserID),
                 {
@@ -358,7 +330,6 @@ if (changePasswordForm) {
                 }
             );
 
-            // Update local user information
             currentUserInfo.Password = newPassword;
 
             changePasswordForm.reset();
@@ -374,15 +345,10 @@ if (changePasswordForm) {
 
 
 editMyPassBtn.addEventListener("click", () => {
-    // changePassDiv.style.display = "block";
     changePassDiv.classList.toggle('hidden');
-    // editMyInformation();
 });
 
-// --------------------------------------------------
-// MANAGER EMPLOYEE DIRECTORY
-// --------------------------------------------------
-
+//load list of employees
 async function loadEmployeeDirectory() {
     const container = document.getElementById("employeeDirectory");
 
@@ -394,7 +360,7 @@ async function loadEmployeeDirectory() {
     console.log("Total user documents:", usersSnapshot.size);
     console.log("Total contact documents:", contactsSnapshot.size);
 
-    // Match contact information to userInfo document IDs
+    // match doc ids
     const contactsByUserID = new Map();
 
     contactsSnapshot.docs.forEach(contactDoc => {
@@ -411,11 +377,23 @@ async function loadEmployeeDirectory() {
     container.innerHTML = "";
 
     let displayedEmployees = 0;
-
-    usersSnapshot.docs.forEach(userDoc => {
+    
+    // sort employees (alphabetical - first name)
+    const sortedUsers = usersSnapshot.docs
+        .filter(userDoc => userDoc.id !== currentUserDocID)
+        .sort((a, b) => {
+            const nameA = a.data().Name || "";
+            const nameB = b.data().Name || "";
+    
+            return nameA.localeCompare(nameB, undefined, {
+                sensitivity: "base"
+            });
+        });
+    
+    sortedUsers.forEach(userDoc => {
         const employee = userDoc.data();
 
-        // Exclude only the currently logged-in manager
+        // don't display user in employee list
         if (userDoc.id === currentUserDocID) {
             return;
         }
@@ -457,16 +435,12 @@ async function loadEmployeeDirectory() {
         displayedEmployees++;
     });
 
-    console.log("Employees displayed:", displayedEmployees);
-
     if (displayedEmployees === 0) {
         container.textContent = "No other employees were found.";
     }
 }
 
-// --------------------------------------------------
-// AVAILABILITY INPUTS
-// --------------------------------------------------
+//availability
 
 const weekdays = [
     "Monday",
@@ -521,7 +495,7 @@ function createAvailabilityInputs() {
         });
     });
 
-    // Set the minimum date to 14 days from today
+    //must go into affect 2 weeks out
     const minDate = new Date();
     minDate.setDate(minDate.getDate() + 14);
 
@@ -537,10 +511,7 @@ function formatDateForInput(date) {
     return `${year}-${month}-${day}`;
 }
 
-// --------------------------------------------------
-// DISPLAY AVAILABILITY
-// --------------------------------------------------
-
+//display availability
 function displayAvailability() {
     const currentContainer =
         document.getElementById("currentAvailability");
@@ -550,7 +521,7 @@ function displayAvailability() {
 
     const now = new Date();
 
-    // Find the latest currently effective availability
+    //get active availability
     const currentRecords = availabilityRecords
         .filter(record =>
             record.StartDate &&
@@ -562,7 +533,7 @@ function displayAvailability() {
 
     const currentRecord = currentRecords[0];
 
-    // Find future availability changes
+    // get availability changes
     const futureRecords = availabilityRecords
         .filter(record =>
             record.StartDate &&
@@ -572,7 +543,7 @@ function displayAvailability() {
             a.StartDate.toMillis() - b.StartDate.toMillis()
         );
 
-    // Display current availability
+    // display current availability
     currentContainer.innerHTML = "";
 
     if (currentRecord) {
@@ -588,7 +559,7 @@ function displayAvailability() {
             "You have not submitted availability yet.";
     }
 
-    // Display future availability on the right
+    // display future availability
     futureContainer.innerHTML = "";
 
     if (futureRecords.length === 0) {
@@ -623,28 +594,26 @@ function displayAvailability() {
     });
 }
 
+//display shift times in availability sections
 function displayDayTimes(container, dayTimeAvail = {}) {
     weekdays.forEach(day => {
         const paragraph = document.createElement("p");
         const times = dayTimeAvail?.[day];
 
         paragraph.textContent = times
-            ? `${day}: ${times.StartTime} – ${times.EndTime}`
+            ? `${day}: ${formatShiftTime(times.StartTime)} – ${formatShiftTime(times.EndTime)}`
             : `${day}: Unavailable`;
 
         container.appendChild(paragraph);
     });
 }
 
-// --------------------------------------------------
-// EDIT AVAILABILITY
-// --------------------------------------------------
-
+//edit availability
 const editAvailabilityBtn = document.getElementById("editAvailability");
 const availabilityForm = document.getElementById("availabilityForm");
 
 editAvailabilityBtn.addEventListener("click", () => {
-    // Pre-fill from the latest currently effective schedule
+    // fill info w/ current availbility
     const now = new Date();
 
     const currentRecord = availabilityRecords
@@ -673,7 +642,6 @@ editAvailabilityBtn.addEventListener("click", () => {
         end.value = times?.EndTime || "";
     });
 
-    // Recalculate minimum date each time the form opens
     const minDate = new Date();
     minDate.setDate(minDate.getDate() + 14);
 
@@ -690,10 +658,8 @@ document.getElementById("cancelAvailabilityEdit")
         editAvailabilityBtn.style.display = "block";
     });
 
-// --------------------------------------------------
-// SAVE NEW AVAILABILITY
-// --------------------------------------------------
 
+//save availability
 availabilityForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -706,7 +672,6 @@ availabilityForm.addEventListener("submit", async (event) => {
             return;
         }
 
-        // Use local calendar dates for the 14-day rule
         const [year, month, day] = selectedDate.split("-").map(Number);
 
         const effectiveDate = new Date(year, month - 1, day);
@@ -762,7 +727,7 @@ availabilityForm.addEventListener("submit", async (event) => {
             DayTimeAvail: dayTimeAvail
         };
 
-        // Create a new document. Do not overwrite previous availability.
+        // make new doc, prevent overwrite of current availability
         await addDoc(availabilityCollection, newAvailability);
 
         // Refresh availability records
@@ -794,7 +759,6 @@ availabilityForm.addEventListener("submit", async (event) => {
 async function cancelFutureAvailability(record) {
     const startDate = record.StartDate.toDate();
 
-    // Prevent cancelling current or past availability
     if (startDate <= new Date()) {
         alert("Only future availability changes can be cancelled.");
         return;
@@ -809,7 +773,6 @@ async function cancelFutureAvailability(record) {
     try {
         await deleteDoc(doc(db, "availability", record.docID));
 
-        // Remove the deleted record from the locally loaded records
         const index = availabilityRecords.findIndex(
             item => item.docID === record.docID
         );

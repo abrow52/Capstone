@@ -129,8 +129,7 @@
   }
 }
 
-
-/* Ensure shift times are visible in agenda view */
+/* make sure shift times appear in list view */
 #calendar.list-view .agenda-events {
   display: flex;
   flex-direction: column;
@@ -150,6 +149,14 @@
   line-height: 1.5;
   visibility: visible;
   opacity: 1;
+}
+
+.agenda-event{
+  cursor: pointer;
+}
+
+.event-category.purple {
+  background-color: #9b59b6;
 }
 
 #calendar.list-view .agenda-event-name {

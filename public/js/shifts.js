@@ -1,5 +1,4 @@
 import { db } from "./firebase.js";
-
 import {collection, getDocs, getDoc, setDoc, doc, runTransaction} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 let scheduleMode = false;
@@ -34,7 +33,7 @@ async function loadSavedAssignments() {
         Saturday: 6
     };
 
-    // First collect every assignment and unique employee reference.
+    // get shift assignments and employees
     const assignmentsToLoad = [];
     const employeeRefs = new Map();
 
@@ -66,13 +65,12 @@ async function loadSavedAssignments() {
                     employeePath: employeeRef.path
                 });
 
-                // Avoid fetching the same employee more than once.
+                // no duplicate employees
                 employeeRefs.set(employeeRef.path, employeeRef);
             }
         }
     }
 
-    // Fetch all unique employee documents concurrently.
     const employeeResults = await Promise.all(
         Array.from(employeeRefs.entries()).map(async ([path, ref]) => {
             const employeeDoc = await getDoc(ref);
@@ -93,7 +91,7 @@ async function loadSavedAssignments() {
         ])
     );
 
-    // Build the new map only after the reads have completed.
+    // make map after all needed info is read
     const newAssignments = new Map();
 
     assignmentsToLoad.forEach(assignment => {
@@ -123,14 +121,14 @@ const weekdays = {
     Friday: "Fri",
     Saturday: "Sat"
 };
-// used in doc ids
+
 const shiftTypes = {
     Morning: "M",
     Evening: "E",
     Night: "N"
 };
 
-
+//shifts and scheduling open separately
 function closeOtherPanel(panelToKeepOpen) {
     const shiftsForm = document.getElementById("shiftsbtn");
     const schedulePanel = document.getElementById("scheduleModeControls");
@@ -139,9 +137,7 @@ function closeOtherPanel(panelToKeepOpen) {
         if (schedulePanel) {
             schedulePanel.style.display = "none";
         }
-    } 
-    
-    else if (panelToKeepOpen === "schedule") {
+    } else if (panelToKeepOpen === "schedule") {
         if (shiftsForm) {
             shiftsForm.style.display = "none";
         }
@@ -165,14 +161,33 @@ if (shiftsForm) {
         const shiftType = document.getElementById("shiftType").value;
         const startTime = document.getElementById("startTime").value;
         const endTime = document.getElementById("endTime").value;
+        const startDate = document.getElementById("shiftStartDate").value;
+        const endDate = document.getElementById("shiftEndDate").value;
+        const shiftQuantity = Number(document.getElementById("shiftQuantity").value);
 
         // get selected days
         const shiftDays = Array.from(
-            document.getElementById("shiftDays").selectedOptions
-        ).map(option => option.value);
+            document.querySelectorAll('input[name="shiftDays"]:checked')
+        ).map(checkbox => checkbox.value);
 
-        if (!shiftType || !startTime || !endTime || shiftDays.length === 0) {
-            alert("Please complete all shift fields and select at least one day.");
+        if (
+            !shiftType ||
+            !startTime ||
+            !endTime ||
+            !startDate ||
+            shiftDays.length === 0
+        ) {
+            alert("Please complete all required shift fields and select at least one day.");
+            return;
+        }
+        
+        if (endDate && endDate < startDate) {
+            alert("The end date can't be before the start date.");
+            return;
+        }
+
+        if (!Number.isInteger(shiftQuantity) || shiftQuantity < 1) {
+            alert("Please enter a valid number of shifts.");
             return;
         }
 
@@ -185,64 +200,63 @@ if (shiftsForm) {
 
         try {
 
-            // Save one uniquely numbered shift for each selected day.
+            // save a new shift per day
             for (const day of shiftDays) {
 
                 const dayCode = weekdays[day];
-
-                // Example: Mon:M
                 const counterID = `${dayCode}_${shiftCode}`;
 
-                // Counter document keeps track of the next number.
+                // Counter doc keeps track of numbers
                 const counterRef = doc(db, "shiftCounters", counterID);
 
-                // Generate the shift ID and save it atomically.
+                // generate shift id and number of shifts
                 await runTransaction(db, async (transaction) => {
 
-                    const counterSnapshot =
-                        await transaction.get(counterRef);
+                    const counterSnapshot = await transaction.get(counterRef);
 
                     const currentNumber = counterSnapshot.exists()
                         ? counterSnapshot.data().count
                         : 0;
 
-                    const nextNumber = currentNumber + 1;
+                    for (let i = 1; i <= shiftQuantity; i++) {
 
-                    // Example: Mon:M:1
-                    const shiftID =
-                        `${dayCode}:${shiftCode}:${nextNumber}`;
+                        const nextNumber = currentNumber + i;
 
-                    const shiftRef =
-                        doc(db, "shifts", shiftID);
+                        const shiftID =
+                            `${dayCode}:${shiftCode}:${nextNumber}`;
 
-                    // Update the counter.
+                        const shiftRef = doc(db, "shifts", shiftID);
+
+                        transaction.set(shiftRef, {
+                            ShiftTime: {
+                                StartTime: startTime,
+                                EndTime: endTime
+                            },
+                            ShiftDate: {
+                                StartDate: startDate,
+                                EndDate: endDate || null
+                            }
+                        });
+                    }
+                    // Update counter
                     transaction.set(counterRef, {
-                        count: nextNumber
-                    });
-
-                    // Save the shift template.
-                    transaction.set(shiftRef, {
-                        ShiftTime: {
-                            StartTime: startTime,
-                            EndTime: endTime
-                        }
+                        count: currentNumber + shiftQuantity
                     });
 
                 });
-
             }
 
             alert("Shift templates saved successfully!");
 
             shiftsForm.reset();
-            // hideForm();
 
             if ((scheduleMode || shiftMode)&& window.scheduleCalendar) {
                 const snapshot = await getDocs(collection(db, "shifts"));
             
                 availableShifts = snapshot.docs.map(shiftDoc => ({
                     id: shiftDoc.id,
-                    shiftTime: shiftDoc.data().ShiftTime
+                    shiftTime: shiftDoc.data().ShiftTime,
+                    shiftDate: shiftDoc.data().ShiftDate || {}
                 }));
             
                 if (scheduleMode) {
@@ -250,10 +264,6 @@ if (shiftsForm) {
                 } else if (shiftMode) {
                     drawAvailableShiftEvents();
                 }
-                // window.scheduleCalendar.events =
-                //     buildShiftEvents(window.scheduleCalendar.current);
-            
-                // window.scheduleCalendar.draw();
             }
 
         } catch (error) {
@@ -278,12 +288,9 @@ async function showShiftCalendar(allowAssignment) {
         return;
     }
 
-    // Identify this particular view change.
-    // This prevents an older background request from
-    // redrawing the calendar after the manager switches views.
     const requestId = ++calendarViewRequestId;
 
-    // Switch modes immediately.
+    // switch modes
     scheduleMode = allowAssignment;
     shiftMode = !allowAssignment;
 
@@ -303,7 +310,6 @@ async function showShiftCalendar(allowAssignment) {
         }
     };
 
-    // If shifts have already been loaded, display them immediately.
     if (availableShifts.length > 0) {
         if (allowAssignment) {
             drawSchedulingEvents();
@@ -313,35 +319,27 @@ async function showShiftCalendar(allowAssignment) {
     }
 
     try {
-        // Load the shift templates.
         const snapshot = await getDocs(collection(db, "shifts"));
 
-        // Ignore this result if the manager has switched views.
+        // ignore if view was switched
         if (requestId !== calendarViewRequestId) return;
 
         availableShifts = snapshot.docs.map(shiftDoc => ({
             id: shiftDoc.id,
-            shiftTime: shiftDoc.data().ShiftTime
+            shiftTime: shiftDoc.data().ShiftTime,
+            shiftDate: shiftDoc.data().ShiftDate || {}
         }));
 
-        // Show the available shifts immediately.
         if (allowAssignment) {
             drawSchedulingEvents();
         } else {
             drawAvailableShiftEvents();
         }
 
-        // Load employee assignments in the background.
-        // Do not make the manager wait for these reads.
         if (allowAssignment) {
             loadSavedAssignments()
                 .then(() => {
-                    // Only update the calendar if we're still
-                    // in the same Create Schedule view.
-                    if (
-                        requestId === calendarViewRequestId &&
-                        scheduleMode
-                    ) {
+                    if (requestId === calendarViewRequestId && scheduleMode) {
                         drawSchedulingEvents();
                     }
                 })
@@ -367,38 +365,20 @@ function startScheduleMode() {
     return showShiftCalendar(true);
 }
 
-//exit shift mode
 function exitShiftMode() {
-
     shiftMode = false;
 
     if (!window.scheduleCalendar) return;
 
     window.isShiftMode = false;
-
-    // const assignmentPanel = document.getElementById("shiftAssignmentPanel");
-
-    // if (assignmentPanel) {
-    //     assignmentPanel.style.display = "none";
-    // }
-
-    // Remove month-change callback.
     window.scheduleCalendar.onMonthChange = null;
-
-    // Restore normal calendar events.
     window.scheduleCalendar.events = window.normalCalendarEvents || [];
-
     window.scheduleCalendar.draw();
 
-    // Restore buttons.
-    // scheduleControls.style.display = "none";
-
     createScheduleBtn.style.display = "inline-block";
-
     showCreateShiftsBtn.style.display = "inline-block";
 
     availableShifts = [];
-
 }
 
 //exit scheduling mode
@@ -416,23 +396,15 @@ function exitScheduleMode() {
         assignmentPanel.style.display = "none";
     }
 
-    // Remove month-change callback.
     window.scheduleCalendar.onMonthChange = null;
-
-    // Restore normal calendar events.
     window.scheduleCalendar.events = window.normalCalendarEvents || [];
-
     window.scheduleCalendar.draw();
 
-    // Restore buttons.
     scheduleControls.style.display = "none";
-
     createScheduleBtn.style.display = "inline-block";
-
     showCreateShiftsBtn.style.display = "inline-block";
 
     availableShifts = [];
-
 }
 
 //make shifts
@@ -450,8 +422,6 @@ function buildShiftEvents(month) {
     ) {
 
         const currentDay = startOfMonth.clone().date(dayNumber);
-
-        // Get the three-letter weekday.
         const dayCode = currentDay.format("ddd");
 
         availableShifts.forEach((shift) => {
@@ -460,15 +430,26 @@ function buildShiftEvents(month) {
                 return;
             }
 
-            // Example ID: Mon:N
             const shiftParts = shift.id.split(":");
-
             const shiftDay = shiftParts[0];
             const shiftType = shiftParts[1];
             const shiftNumber = shiftParts[2];
 
-            // Only display shifts matching this weekday.
+            // display shifts according to the weeks.
             if (shiftDay !== dayCode) {
+                return;
+            }
+
+            // check date range
+            const shiftStartDate = shift.shiftDate?.StartDate;
+            const shiftEndDate = shift.shiftDate?.EndDate;
+            const currentDate = currentDay.format("YYYY-MM-DD");
+
+            //display the shift inside start and end dates
+            if (shiftStartDate && currentDate < shiftStartDate) {
+                return;
+            }
+            if (shiftEndDate && currentDate > shiftEndDate) {
                 return;
             }
 
@@ -504,11 +485,16 @@ function buildShiftEvents(month) {
 
     }
 
+    //sort events by start time
+    events.sort((a, b) => {
+        return timeToMinutes(a.shiftStart) - timeToMinutes(b.shiftStart);
+    });
+
     return events;
 
 }
 
-function formatShiftTime(time) {
+export function formatShiftTime(time) {
     if (typeof time === "string" && time.includes(":")) {
         const [hours, minutes] = time.split(":").map(Number);
         const period = hours >= 12 ? "PM" : "AM";
@@ -557,6 +543,22 @@ window.selectShiftForScheduling = async function(shiftEvent) {
     const currentAssignment = pending
         ? (pending.employeeID ? pending : null)
         : savedAssignments.get(key);
+    
+    // display the pending change
+    if (pending) {
+        const pendingMessage = document.createElement("p");
+        pendingMessage.className = "pending-change";
+
+        if (pending.employeeID) {
+            pendingMessage.innerHTML =
+                `<strong>Pending change:</strong> Assigning to ${pending.employeeName}`;
+        } else {
+            pendingMessage.innerHTML =
+                `<strong>Pending change:</strong> Unassigning this shift`;
+        }
+
+        details.appendChild(pendingMessage);
+    }
 
     if (currentAssignment) {
         const unassignButton = document.createElement("button");
@@ -581,10 +583,9 @@ window.selectShiftForScheduling = async function(shiftEvent) {
         for (const availabilityDoc of availabilitySnapshot.docs) {
             const availability = availabilityDoc.data();
 
-            // Make sure the availability belongs to an employee.
             if (!availability.id) continue;
 
-            // Ignore availability that starts after the selected date.
+            // use availability within the start/end date
             const startDate = availability.StartDate?.toDate
                 ? availability.StartDate.toDate()
                 : new Date(availability.StartDate);
@@ -604,12 +605,11 @@ window.selectShiftForScheduling = async function(shiftEvent) {
 
             if (shiftEnd <= shiftStart) continue;
 
-            // Employee must cover the entire shift.
+            // can only assign employees who can cover the whole shift
             if (availableStart > shiftStart || availableEnd < shiftEnd) {
                 continue;
             }
 
-            // Retrieve the employee's userInfo document.
             const userDoc = await getDoc(availability.id);
 
             if (!userDoc.exists()) continue;
@@ -677,14 +677,15 @@ function shiftsOverlap(startA, endA, startB, endB) {
     return startA < endB && startB < endA;
 }
 
+//pending assignments
 function stageAssignment(employee, shiftEvent) {
-    // Check whether this shift already has a pending assignment.
+    // check for a pending assignment
     const existingIndex = pendingAssignments.findIndex(item =>
         item.shiftID === shiftEvent.shiftID &&
         item.date.isSame(shiftEvent.date, "day")
     );
 
-    // Prevent overlapping pending shifts for the same employee.
+    // prevent overlap for pending assignments
     const newStart = timeToMinutes(shiftEvent.shiftStart);
     const newEnd = timeToMinutes(shiftEvent.shiftEnd);
 
@@ -725,7 +726,7 @@ function stageAssignment(employee, shiftEvent) {
         pendingAssignments.push(assignment);
     }
 
-    // Redraw the calendar with the pending employee name.
+    // display pending employee name
     const event = window.scheduleCalendar.events.find(item =>
         item.shiftID === shiftEvent.shiftID &&
         item.date.isSame(shiftEvent.date, "day")
@@ -736,22 +737,14 @@ function stageAssignment(employee, shiftEvent) {
         event.employeeName = employee.name;
         event.eventName =
             `${formatShiftTime(event.shiftStart)} - ${formatShiftTime(event.shiftEnd)} — ${employee.name}`;
-        event.color = "blue";
+        event.color = "purple";
         event.isAssigned = true;
     
         updateShiftEventInPlace(event);
     }
-
-    // Update the assignment panel.
-    const details = document.getElementById("selectedShiftDetails");
-
-    if (details) {
-        details.innerHTML += `
-            <p><strong>Pending assignment:</strong> ${employee.name}</p>
-        `;
-    }
 }
 
+//pending unassignments
 function stageUnassignment(shiftEvent) {
     const key = getShiftKey(shiftEvent.shiftID, shiftEvent.date);
 
@@ -784,21 +777,14 @@ function stageUnassignment(shiftEvent) {
         event.employeeName = null;
         event.eventName =
             `${formatShiftTime(event.shiftStart)} - ${formatShiftTime(event.shiftEnd)}`;
-        event.color = "orange";
+        event.color = "purple";
         event.isAssigned = false;
 
         updateShiftEventInPlace(event);
     }
-
-    // Update the assignment panel.
-    const details = document.getElementById("selectedShiftDetails");
-
-    if (details) {
-        details.innerHTML += `<p><strong>Pending:</strong> Shift unassigned</p>`;
-    }
 }
 
-// Display available shifts without showing employee assignments.
+// display created shifts
 function drawAvailableShiftEvents() {
     if (!window.scheduleCalendar) return;
 
@@ -818,25 +804,29 @@ function drawSchedulingEvents() {
     events.forEach(event => {
         const key = getShiftKey(event.shiftID, event.date);
 
-        // A pending change takes priority over the saved assignment.
         const pending = pendingAssignments.find(item =>
             getShiftKey(item.shiftID, item.date) === key
         );
 
         const assignment = pending
-            ? (pending.employeeID
-                ? pending
-                : null)
+            ? (pending.employeeID ? pending : null)
             : savedAssignments.get(key);
 
         if (assignment) {
             event.employeeID = assignment.employeeID;
             event.employeeName = assignment.employeeName;
             event.eventName += ` — ${assignment.employeeName}`;
-            event.color = "blue";
             event.isAssigned = true;
         } else {
             event.isAssigned = false;
+        }
+
+        if (pending) {
+            event.color = "purple";
+        } else if (assignment) {
+            event.color = "blue";
+        } else {
+            event.color = "orange";
         }
     });
 
@@ -847,14 +837,18 @@ function drawSchedulingEvents() {
 function updateShiftEventInPlace(shiftEvent) {
     const key = getShiftKey(shiftEvent.shiftID, shiftEvent.date);
 
-    const selectors = [
-        `.calendar-event[data-shift-key="${key}"]`,
-        `.agenda-event[data-shift-key="${key}"]`
-    ];
+    const calendar = window.scheduleCalendar;
+    if (!calendar) return;
 
-    selectors.forEach(selector => {
-        const element = document.querySelector(selector);
-        if (!element) return;
+    //find matching event
+    const elements = calendar.el.querySelectorAll(
+        ".calendar-event, .agenda-event"
+    );
+
+    let updated = false;
+
+    elements.forEach(element => {
+        if (element.dataset.shiftKey !== key) return;
 
         const nameElement = element.querySelector(
             ".calendar-event-name, .agenda-event-name"
@@ -870,24 +864,23 @@ function updateShiftEventInPlace(shiftEvent) {
             colorElement.className =
                 `event-category ${shiftEvent.color}`;
         }
+
+        updated = true;
     });
+
+    console.log("Shift updated in place:", key, updated);
 }
 
 //assign employee to shift
 async function assignEmployeeToShift(employee, shiftEvent) {
     try {
       const selectedDate = shiftEvent.date.clone();
-  
-      // Get the Sunday starting this schedule week.
       const sunday = selectedDate.clone().startOf("week");
-  
       const scheduleID = sunday.format("YYYY-MM-DD");
       const dayName = selectedDate.format("dddd");
-  
       const scheduleRef = doc(db, "schedule", scheduleID);
       const employeeRef = doc(db, "userInfo", employee.id);
       const shiftRef = doc(db, "shifts", shiftEvent.shiftID);
-  
       const newStart = timeToMinutes(shiftEvent.shiftStart);
       const newEnd = timeToMinutes(shiftEvent.shiftEnd);
   
@@ -903,7 +896,7 @@ async function assignEmployeeToShift(employee, shiftEvent) {
           ? scheduleSnapshot.data()
           : {};
   
-        // Support the old field name during migration.
+        // Support the old field name
         const weeklySchedule = existingData.schedule || existingData["schedule "] || {};
   
         const daySchedule = weeklySchedule[dayName] || {};
@@ -911,11 +904,10 @@ async function assignEmployeeToShift(employee, shiftEvent) {
         let matchingSlot = null;
         const existingShiftReads = [];
   
-        // Read all assigned shifts for this employee on this day.
+        // read employees assigned shifts
         for (const [slotName, slot] of Object.entries(daySchedule)) {
           if (!slot || !slot.ShiftID) continue;
   
-          // Check whether this is the shift being assigned.
           if (slot.ShiftID.path === shiftRef.path) {
             matchingSlot = { slotName, slot };
   
@@ -927,7 +919,6 @@ async function assignEmployeeToShift(employee, shiftEvent) {
             continue;
           }
   
-          // Only check shifts already assigned to this employee.
           if (!slot.Associate || slot.Associate.path !== employeeRef.path) {
             continue;
           }
@@ -938,7 +929,7 @@ async function assignEmployeeToShift(employee, shiftEvent) {
           });
         }
   
-        // Read the shift templates before making any writes.
+        // Read before writing
         for (const existingShift of existingShiftReads) {
           const existingShiftSnapshot = await transaction.get(
             existingShift.shiftRef
@@ -974,10 +965,9 @@ async function assignEmployeeToShift(employee, shiftEvent) {
           }
         }
   
-        // Reuse the matching shift slot if it exists.
+        // Reuse shift slot if it exists
         let slotName = matchingSlot?.slotName;
-  
-        // Otherwise find an empty Shift1, Shift2, etc.
+        // make new slot
         if (!slotName) {
           let slotNumber = 1;
   
@@ -1003,7 +993,6 @@ async function assignEmployeeToShift(employee, shiftEvent) {
   
       alert(`${employee.name} was assigned successfully.`);
   
-      // Refresh the available employee list for the selected shift.
       if (window.selectShiftForScheduling) {
         await window.selectShiftForScheduling(shiftEvent);
       }
@@ -1025,7 +1014,7 @@ async function saveSchedule() {
     try {
         if (saveButton) saveButton.disabled = true;
 
-        // Group assignments by their Sunday-based schedule week.
+        // group shifts based on week
         const weeklyAssignments = {};
 
         pendingAssignments.forEach(assignment => {
@@ -1039,7 +1028,6 @@ async function saveSchedule() {
             weeklyAssignments[scheduleID].push(assignment);
         });
 
-        // Save each week's assignments.
         for (const [scheduleID, assignments] of Object.entries(weeklyAssignments)) {
             const scheduleRef = doc(db, "schedule", scheduleID);
 
@@ -1050,26 +1038,25 @@ async function saveSchedule() {
                     ? scheduleSnapshot.data().schedule || {}
                     : {};
 
-                // Apply every assignment to its weekday.
                 assignments.forEach(assignment => {
                     const dayName = assignment.date.format("dddd");
 
                     const daySchedule = weeklySchedule[dayName] || {};
 
                     const shiftRef = doc(db, "shifts", assignment.shiftID);
-                    const employeeRef = doc(db, "userInfo", assignment.employeeID);
 
-                    // Find this shift's existing slot, if it has one.
+                    // find the shifts slot
                     let slotName = Object.keys(daySchedule).find(key =>
                         daySchedule[key]?.ShiftID?.path === shiftRef.path
                     );
 
-                    // If this is an unassignment, remove the existing slot.
+                    // handle unassignment
                     if (!assignment.employeeID) {
                         if (slotName) {
                             delete daySchedule[slotName];
                         }
 
+                        // Remove the weekday if no shifts remain
                         if (Object.keys(daySchedule).length === 0) {
                             delete weeklySchedule[dayName];
                         } else {
@@ -1079,9 +1066,9 @@ async function saveSchedule() {
                         return;
                     }
 
-                    // Otherwise, assign the employee.
-                    // const employeeRef = doc(db, "userInfo", assignment.employeeID);
+                    const employeeRef = doc(db, "userInfo", assignment.employeeID);
 
+                    // Find an empty slot if shift isn't already in the schedule.
                     if (!slotName) {
                         let number = 1;
 
@@ -1118,7 +1105,6 @@ async function saveSchedule() {
             });
         }
 
-        // Update the local saved-assignment lookup.
         pendingAssignments.forEach(assignment => {
             const key = getShiftKey(assignment.shiftID, assignment.date);
 
@@ -1130,6 +1116,37 @@ async function saveSchedule() {
             } else {
                 savedAssignments.delete(key);
             }
+        });
+
+        // update calendar events
+        pendingAssignments.forEach(assignment => {
+            const event = window.scheduleCalendar.events.find(item =>
+                item.shiftID === assignment.shiftID &&
+                item.date.isSame(assignment.date, "day")
+            );
+
+            if (!event) return;
+
+            const key = getShiftKey(assignment.shiftID, assignment.date);
+            const saved = savedAssignments.get(key);
+
+            if (saved) {
+                event.employeeID = saved.employeeID;
+                event.employeeName = saved.employeeName;
+                event.eventName =
+                    `${formatShiftTime(event.shiftStart)} - ${formatShiftTime(event.shiftEnd)} — ${saved.employeeName}`;
+                event.color = "blue";
+                event.isAssigned = true;
+            } else {
+                event.employeeID = null;
+                event.employeeName = null;
+                event.eventName =
+                    `${formatShiftTime(event.shiftStart)} - ${formatShiftTime(event.shiftEnd)}`;
+                event.color = "orange";
+                event.isAssigned = false;
+            }
+
+            updateShiftEventInPlace(event);
         });
 
         pendingAssignments = [];
@@ -1154,14 +1171,12 @@ if (createScheduleBtn) {
 
 if (showCreateShiftsBtn) {
     showCreateShiftsBtn.addEventListener("click", async () => {
-        // Hide the Schedule panel
+        // hide schedule panel
         closeOtherPanel("shift");
-
         // Show the Create Shifts form immediately
         if (shiftsForm) {
             shiftsForm.style.display = "block";
         }
-        // Then load the shift calendar
         await startShiftMode();
     });
 }

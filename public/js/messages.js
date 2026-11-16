@@ -1,8 +1,6 @@
 
 import { db } from "./firebase.js";
-
-import { collection, doc, getDoc, getDocs, query, where, setDoc, updateDoc, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, query, where, setDoc, updateDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const currentUserID = sessionStorage.getItem("userID");
 

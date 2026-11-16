@@ -48,9 +48,8 @@ body {
 }
 
 #calendarFilter{
-    size: small;
     padding: 1px;
-    max-height: 20px;
+    max-height: 40px;
 }
 
 /* Sidebar column */
