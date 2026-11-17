@@ -27,36 +27,63 @@ if (currentUserName) {
   function Calendar(selector, events) {
     this.el = document.querySelector(selector);
     this.events = events;
-    this.current = moment().date(1);
+    this.current = moment();
+    this.calendarPeriod = 'day';
+    this.view = 'list';
     this.draw();
     var current = document.querySelector('.today');
   }
 
   Calendar.prototype.draw = function() {
-    this.drawHeader();
+    this.el.classList.toggle(
+      'list-view',
+      this.view === 'list'
+    );
 
+    this.drawHeader();
+  
     if (this.view === 'list') {
-      // remove calendar grid
       if (this.month) {
         this.month.remove();
         this.month = null;
       }
-
+  
       if (this.weekHeader) {
         this.weekHeader.remove();
         this.weekHeader = null;
       }
-
+  
+      this.week = null;
       this.drawAgenda();
+  
     } else {
       // Remove the agenda when returning to calendar mode
       if (this.agenda) {
         this.agenda.remove();
         this.agenda = null;
       }
+  
+      if (this.calendarPeriod === 'month') {
+        this.drawWeekHeader();
+        this.drawMonth();
+      } else {
+        if (this.month) {
+          this.month.remove();
+          this.month = null;
+        }
+  
+        if (this.weekHeader) {
+          this.weekHeader.remove();
+          this.weekHeader = null;
+        }
 
-      this.drawWeekHeader();
-      this.drawMonth();
+        if (this.calendarPeriod === 'week') {
+          this.drawWeekHeader();
+        }
+        
+  
+        this.drawPeriod();
+      }
     }
   };
 
@@ -83,7 +110,20 @@ if (currentUserName) {
       this.el.appendChild(this.header);
     }
 
-    this.title.innerHTML = this.current.format('MMMM YYYY');
+    // this.title.innerHTML = this.current.format('MMMM YYYY');
+    if (this.calendarPeriod === 'day') {
+      this.title.textContent = this.current.format('dddd, MMMM D, YYYY');
+    
+    } else if (this.calendarPeriod === 'week') {
+      const start = this.current.clone().startOf('week');
+      const end = this.current.clone().endOf('week');
+    
+      this.title.textContent =
+        `${start.format('MMM D')} – ${end.format('MMM D, YYYY')}`;
+    
+    } else {
+      this.title.textContent = this.current.format('MMMM YYYY');
+    }
   }
 
   Calendar.prototype.drawWeekHeader = function() {
@@ -133,8 +173,29 @@ if (currentUserName) {
     }
   }
 
+  Calendar.prototype.drawPeriod = function() {
+    this.month = createElement(
+      'div',
+      `month new ${this.calendarPeriod}-period`
+    );
+  
+    this.el.appendChild(this.month);
+  
+    this.week = null;
+  
+    const start = this.calendarPeriod === 'day'
+      ? this.current.clone().startOf('day')
+      : this.current.clone().startOf('week');
+  
+    const numberOfDays = this.calendarPeriod === 'day' ? 1 : 7;
+  
+    for (let i = 0; i < numberOfDays; i++) {
+      this.drawDay(start.clone().add(i, 'days'));
+    }
+  };
+
   Calendar.prototype.backFill = function() {
-    var clone = this.current.clone();
+    var clone = this.current.clone().startOf('month');
     var dayOfWeek = clone.day();
 
     if(!dayOfWeek) { return; }
@@ -147,7 +208,7 @@ if (currentUserName) {
   }
 
   Calendar.prototype.fowardFill = function() {
-    var clone = this.current.clone().add('months', 1).subtract('days', 1);
+    var clone = this.current.clone().endOf('month');
     var dayOfWeek = clone.day();
 
     if(dayOfWeek === 6) { return; }
@@ -158,9 +219,9 @@ if (currentUserName) {
   }
 
   Calendar.prototype.currentMonth = function() {
-    var clone = this.current.clone();
-
-    while(clone.month() === this.current.month()) {
+    var clone = this.current.clone().startOf('month');
+  
+    while (clone.month() === this.current.month()) {
       this.drawDay(clone);
       clone.add('days', 1);
     }
@@ -201,7 +262,7 @@ if (currentUserName) {
   }
 
   Calendar.prototype.drawEvents = function(day, element) {
-    if(day.month() === this.current.month()) {
+    if ( this.calendarPeriod !== 'month' || day.month() === this.current.month()) {
       var todaysEvents = this.events.reduce(function(memo, ev) {
         if(ev.date.isSame(day, 'day')) {
           memo.push(ev);
@@ -242,17 +303,29 @@ if (currentUserName) {
 
   //draw the calendar list view
   Calendar.prototype.drawAgenda = function() {
-    // remake the list whenever the month changes
+    // Remove the previous list
     if (this.agenda) {
       this.agenda.remove();
     }
 
     this.agenda = createElement('div', 'agenda-list');
 
-    const daysInMonth = this.current.daysInMonth();
+    let startDate;
+    let numberOfDays;
 
-    for (let i = 1; i <= daysInMonth; i++) {
-      const day = this.current.clone().date(i);
+    if (this.calendarPeriod === 'day') {
+      startDate = this.current.clone().startOf('day');
+      numberOfDays = 1;
+    } else if (this.calendarPeriod === 'week') {
+      startDate = this.current.clone().startOf('week');
+      numberOfDays = 7;
+    } else {
+      startDate = this.current.clone().startOf('month');
+      numberOfDays = this.current.daysInMonth();
+    }
+
+    for (let i = 0; i < numberOfDays; i++) {
+      const day = startDate.clone().add(i, 'days');
 
       const row = createElement('div', 'agenda-row');
 
@@ -279,7 +352,7 @@ if (currentUserName) {
       dateColumn.appendChild(weekday);
       dateColumn.appendChild(dateNumber);
 
-      // Right column: every event on this date
+      // Right column: events for this date
       const eventsColumn = createElement('div', 'agenda-events');
 
       const todaysEvents = this.events.filter(function(ev) {
@@ -293,14 +366,16 @@ if (currentUserName) {
       } else {
         todaysEvents.forEach(function(ev) {
           const eventRow = createElement('div', 'agenda-event');
+
           eventRow.dataset.shiftKey =
             `${ev.date.format("YYYY-MM-DD")}|${ev.shiftID}`;
-            eventRow.addEventListener("click", function(event) {
-              event.stopPropagation();
-          
-              if (window.isScheduleMode && window.selectShiftForScheduling) {
-                  window.selectShiftForScheduling(ev);
-              }
+
+          eventRow.addEventListener("click", function(event) {
+            event.stopPropagation();
+
+            if (window.isScheduleMode && window.selectShiftForScheduling) {
+              window.selectShiftForScheduling(ev);
+            }
           });
 
           const colorSquare = createElement(
@@ -327,15 +402,29 @@ if (currentUserName) {
     }
 
     this.el.appendChild(this.agenda);
+
+    // make sure the current day can be seen in the window when in list view
     const todayRow = this.agenda.querySelector('#today-agenda-row');
 
     if (todayRow) {
-        todayRow.scrollIntoView({
-            block: 'start',
-            behavior: 'auto'
-        });
+        const calendarRect = this.el.getBoundingClientRect();
+        const todayRect = todayRow.getBoundingClientRect();
+
+        const headerHeight = this.header
+            ? this.header.offsetHeight
+            : 0;
+
+        const visibleTop = calendarRect.top + headerHeight;
+        const visibleBottom = calendarRect.bottom;
+
+        if (todayRect.bottom > visibleBottom) {
+            this.el.scrollTop += todayRect.bottom - visibleBottom;
+        } else if (todayRect.top < visibleTop) {
+            this.el.scrollTop -= visibleTop - todayRect.top;
+        }
     }
   };
+
 
   //toggle button
   Calendar.prototype.toggleView = function() {
@@ -352,11 +441,16 @@ if (currentUserName) {
 
   Calendar.prototype.getDayClass = function(day) {
     var classes = ['day'];
-    if(day.month() !== this.current.month()) {
+  
+    if (
+      this.calendarPeriod === 'month' &&
+      day.month() !== this.current.month()
+    ) {
       classes.push('other');
     } else if (today.isSame(day, 'day')) {
       classes.push('today');
     }
+  
     return classes.join(' ');
   }
 
@@ -408,24 +502,38 @@ if (currentUserName) {
 
 
   Calendar.prototype.nextMonth = function() {
-    this.current.add('months', 1);
-    this.next = true;
-
-    if (this.onMonthChange) {
-        this.onMonthChange();
+    if (this.calendarPeriod === 'day') {
+      this.current.add(1, 'days');
+    } else if (this.calendarPeriod === 'week') {
+      this.current.add(1, 'weeks');
+    } else {
+      this.current.add(1, 'months');
     }
-
+  
+    this.next = true;
+  
+    if (this.onMonthChange) {
+      this.onMonthChange();
+    }
+  
     this.draw();
   }
-
+  
   Calendar.prototype.prevMonth = function() {
-    this.current.subtract('months', 1);
-    this.next = false;
-
-    if (this.onMonthChange) {
-        this.onMonthChange();
+    if (this.calendarPeriod === 'day') {
+      this.current.subtract(1, 'days');
+    } else if (this.calendarPeriod === 'week') {
+      this.current.subtract(1, 'weeks');
+    } else {
+      this.current.subtract(1, 'months');
     }
-
+  
+    this.next = false;
+  
+    if (this.onMonthChange) {
+      this.onMonthChange();
+    }
+  
     this.draw();
   }
 
@@ -598,6 +706,26 @@ async function loadCalendarEvents() {
   window.normalCalendarEvents = data;
 
   window.scheduleCalendar = new Calendar("#calendar", data);
+
+  const periodSelector = document.getElementById(
+      "calendarPeriodView"
+  );
+
+  if (periodSelector && !periodSelector.dataset.listenerAdded) {
+      periodSelector.dataset.listenerAdded = "true";
+
+      periodSelector.addEventListener("change", function() {
+          const calendar = window.scheduleCalendar;
+
+          calendar.calendarPeriod = periodSelector.value;
+
+          if (calendar.onMonthChange) {
+              calendar.onMonthChange();
+          }
+
+          calendar.draw();
+      });
+  }
 
   const toggleButton = document.getElementById(
       "toggleCalendarView"

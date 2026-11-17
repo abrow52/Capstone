@@ -9,6 +9,15 @@ const currentUserName = sessionStorage.getItem("Name");
 const currentTitle = sessionStorage.getItem("Title");
 
 async function ManagerloadShiftRequests() {
+    const weekdays = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+    ];
 
     const snapshot = await getDocs(collection(db, "Requests"));
 
@@ -49,8 +58,36 @@ async function ManagerloadShiftRequests() {
                 "Request Type: " + request.reqType;
 
             
-        }
-        else {
+        } else if (request.reqType === "availabilityChange"){
+            const effectiveDate = request.StartDate?.toDate
+                ? request.StartDate.toDate()
+                : new Date(request.StartDate);
+
+            const availabilityDetails = weekdays.map(day => {
+                const times = request.DayTimeAvail?.[day];
+
+                if (!times) {
+                    return `${day}: Unavailable`;
+                }
+
+                return `${day}: ${formatTime(times.StartTime)} - ${formatTime(times.EndTime)}`;
+            }).join("\n");
+
+            card.querySelector(".requestName").textContent =
+                "Associate: " + (request.Name || "Unknown");
+
+            card.querySelector(".requestDate").textContent =
+                "Effective Date: " + effectiveDate.toLocaleDateString();
+
+            card.querySelector(".requestTime").textContent =
+                availabilityDetails;
+
+            card.querySelector(".requestStatus").textContent =
+                "Status: " + request.Status;
+
+            card.querySelector(".requestType").textContent =
+                "Request Type: Availability Change";
+        } else {
             card.querySelector(".requestName").textContent =
                 "Associate: " + (request.Name || "Unknown");
 
@@ -168,6 +205,29 @@ async function ManagerloadShiftRequests() {
                     alert("Time-off request approved!");
 
                     ManagerloadShiftRequests();
+                } else if (request.reqType === "availabilityChange"){
+                    const batch = writeBatch(db);
+
+                    const availabilityRef = doc(collection(db, "availability"));
+                    const requestRef = doc(db, "Requests", requestDoc.id);
+
+                    // Add the approved availability to the active availability collection
+                    batch.set(availabilityRef, {
+                        id: doc(db, "userInfo", request.UserID),
+                        StartDate: request.StartDate,
+                        DayTimeAvail: request.DayTimeAvail
+                    });
+
+                    // Mark the request as approved
+                    batch.update(requestRef, {
+                        Status: "Approved"
+                    });
+
+                    await batch.commit();
+
+                    alert("Availability change approved!");
+
+                    ManagerloadShiftRequests();
                 }
             } catch (error) {
                 console.error("Error approving request:", error);
@@ -209,6 +269,14 @@ async function ManagerloadShiftRequests() {
 
                     alert("Time-off request denied.");
 
+                    ManagerloadShiftRequests();
+                } else if (request.reqType === "availabilityChange"){
+                    await updateDoc(doc(db, "Requests", requestDoc.id), {
+                        Status: "Denied"
+                    });
+                
+                    alert("Availability change denied.");
+                
                     ManagerloadShiftRequests();
                 }
             } catch (error) {

@@ -91,9 +91,18 @@
     <div id = "home"> 
        <!-- left column : calendar -->
       <div class="calendar-section">
-          <button id="toggleCalendarView" type="button">
-              Switch to List View
-          </button>
+          <!-- <div class="calendarBtns"> -->
+            <label for="calendarPeriodView">View:</label>
+
+            <select id="calendarPeriodView">
+                <option value="day" selected>Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+            </select>
+            <button id="toggleCalendarView" type="button">
+                Switch View
+            </button>
+          <!-- </div> -->
           <div id="calendar"></div>
       </div>
       <!-- Right column : sidebar -->
@@ -167,22 +176,6 @@
       </div>
     </div>
   </body>
-  <script>
-    const calendar = document.getElementById("calendar");
-    const toggleButton = document.getElementById("toggleCalendarView");
-
-    toggleButton.addEventListener("click", () => {
-      const isListView = calendar.classList.toggle("list-view");
-
-      console.log("List view active:", isListView);
-      console.log("Calendar classes:", calendar.className);
-
-      toggleButton.textContent = isListView
-        ? "Switch to Calendar View"
-        : "Switch to List View";
-    });
-
-  </script>
   <script>
     function openForm() {
         document.getElementById("myForm").style.display = "block";
