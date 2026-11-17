@@ -28,7 +28,7 @@ async function loadUserRequests() {
         // will need to change for manager view so they can see other employees requests
         const requestsQuery = query(
             collection(db, "Requests"),
-            where("requester", "==", currentUserID)
+            where("UserID", "==", currentUserID)
         );
 
         const snapshot = await getDocs(requestsQuery);
@@ -67,11 +67,11 @@ async function loadUserRequests() {
                 requestCard.appendChild(dates);
             }
 
-            if (request.status === "pending") {
+            if (request.Status === "Pending") {
                 pendingDiv.appendChild(requestCard);
-            } else if (request.status === "approved") {
+            } else if (request.Status === "Approved") {
                 approvedDiv.appendChild(requestCard);
-            } else if (request.status === "denied") {
+            } else if (request.Status === "Denied") {
                 deniedDiv.appendChild(requestCard);
             }
         });
@@ -114,12 +114,14 @@ reqTimeOffForm.addEventListener("submit", async (event) => {
         const requestRef = doc(collection(db, "Requests"));
     
         await setDoc(requestRef, {
-            status: "pending",
+            Status: "Pending",
             reqType: "timeOff",
-            requester: currentUserID,
+            UserID: currentUserID,
+            Name: currentUserName || "",
             leaveType: leaveType,
             startDate: startDate,
             endDate: endDate,
+            submittedAt: new Date()
         });
     
         alert("request submitted successfully!");
@@ -332,38 +334,34 @@ dropShiftForm.addEventListener("submit", async (event) => {
     
         // Create references for the new documents.
         const requestRef = doc(collection(db, "Requests")); //appears on home page 
-        // const requestRef = doc(collection(db, "ShiftRequests")); //appears on request page 
     
         const batch = writeBatch(db);
     
         // Save the employee's drop request.
         batch.set(requestRef, {
             reqType: "dropShift",
-            requester: userID,
+            UserID: userID,
             Name: userName || "",
-            status: "pending",
-    
+            Status: "Pending",
             shiftID: selectedShift.shiftRef,
             Date: selectedShift.date,
             StartTime: selectedShift.startTime,
             EndTime: selectedShift.endTime,
-    
-            // scheduleID: selectedShift.scheduleID,
-    
             submittedAt: new Date()
         });
     
         // make the shift visible in Open Shifts immediately. (manager can approve a drop req w/o someone picking it up)
         // avoid creating duplicate OpenShifts entries.
-        if (existingOpenShift.empty) {
-            const openShiftRef = doc(collection(db, "OpenShifts"));
+        // if (existingOpenShift.empty) {
+        //     const openShiftRef = doc(collection(db, "OpenShifts"));
     
-            batch.set(openShiftRef, {
-                Date: selectedShift.date,
-                shiftID: selectedShift.shiftRef
-            });
-        }
+        //     batch.set(openShiftRef, {
+        //         Date: selectedShift.date,
+        //         shiftID: selectedShift.shiftRef
+        //     });
+        // }
     
+
         // Save both changes together.
         await batch.commit();
     
@@ -381,11 +379,6 @@ dropShiftForm.addEventListener("submit", async (event) => {
     }
 });
 
-//what happens if a request is approved or denied
-// reqResponse.addEventListener("submit", async (event) => {
-//     
-// });
-
 // THIS IS FOR THE PICKUP SHIFT FUNCTIONALITY 
 const container = document.getElementById("shiftList");
 container.addEventListener("click", async function(event) {
@@ -399,12 +392,13 @@ container.addEventListener("click", async function(event) {
         const openShiftId = button.dataset.openShiftId;
         const shiftId = button.dataset.shiftId;
 
-        const snapshot = await getDocs(collection(db, "ShiftRequests"));
+        const snapshot = await getDocs(collection(db, "Requests"));
 
+        //if the requeest is already in the database, don't submit request
          for (const requestDoc of snapshot.docs) {
             const request = requestDoc.data();
-                if (request.Date == openShiftId && request.StartTime == startTime && 
-                        request.EndTime == endTime && request.Status == "Pending") {
+                if (request.Date === date && request.StartTime === startTime && request.EndTime === endTime &&
+                    request.Status === "Pending" && request.reqType === "pickupShift") {
                     alert("Shift was already requested");
                     return; 
                 }
@@ -412,16 +406,19 @@ container.addEventListener("click", async function(event) {
 
         try {
 
-            await addDoc(collection(db, "ShiftRequests"), {
+            await addDoc(collection(db, "Requests"), {
+                reqType: "pickupShift",
                 UserID: currentUserID,
                 Name: currentUserName,
                 Date: date,
                 StartTime: startTime,
                 EndTime: endTime,
                 Status: "Pending", 
-                shiftID: doc(db, "shifts", shiftId)
+                shiftID: doc(db, "shifts", shiftId),
+                submittedAt: new Date()
             });
 
+            //delete the shift from openshifts so someone else can't pick it up
             await deleteDoc(doc(db, "OpenShifts", openShiftId));
 
             button.closest(".shiftInfo").remove();
