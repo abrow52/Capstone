@@ -9,6 +9,17 @@ const currentUserName = sessionStorage.getItem("Name");
 const currentTitle = sessionStorage.getItem("Title");
 
 async function loadUserRequests() {
+
+    const weekdays = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+    ];
+
     const currentUserID = sessionStorage.getItem("userID");
 
     if (!currentUserID) {
@@ -53,6 +64,35 @@ async function loadUserRequests() {
             
                 requestCard.appendChild(details);
             
+            } else if (request.reqType === "availabilityChange"){
+                const heading = document.createElement("p");
+                heading.textContent = "Availability Change Request";
+                requestCard.appendChild(heading);
+
+                const effectiveDate = document.createElement("p");
+
+                const date = request.StartDate?.toDate
+                    ? request.StartDate.toDate()
+                    : new Date(request.StartDate);
+
+                effectiveDate.textContent =
+                    `Effective date: ${date.toLocaleDateString()}`;
+
+                requestCard.appendChild(effectiveDate);
+
+                const dayTimeAvail = request.DayTimeAvail || {};
+
+                weekdays.forEach(day => {
+                    const paragraph = document.createElement("p");
+                    const times = dayTimeAvail[day];
+
+                    paragraph.textContent = times
+                        ? `${day}: ${formatShiftTime(times.StartTime)} – ${formatShiftTime(times.EndTime)}`
+                        : `${day}: Unavailable`;
+
+                    requestCard.appendChild(paragraph);
+                });
+
             } else {
                 const leaveType = document.createElement("p");
                 leaveType.textContent =

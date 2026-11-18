@@ -408,20 +408,30 @@ function exitScheduleMode() {
 }
 
 //make shifts
-function buildShiftEvents(month) {
+function buildShiftEvents(currentDate, calendarPeriod = "month") {
 
     const events = [];
 
-    const startOfMonth = month.clone().startOf("month");
+    let startDate;
+    let numberOfDays;
 
-    // Loop through every day of the displayed month.
-    for (
-        let dayNumber = 1;
-        dayNumber <= month.daysInMonth();
-        dayNumber++
-    ) {
+    if (calendarPeriod === "day") {
+        startDate = currentDate.clone().startOf("day");
+        numberOfDays = 1;
 
-        const currentDay = startOfMonth.clone().date(dayNumber);
+    } else if (calendarPeriod === "week") {
+        startDate = currentDate.clone().startOf("week");
+        numberOfDays = 7;
+
+    } else {
+        startDate = currentDate.clone().startOf("month");
+        numberOfDays = currentDate.daysInMonth();
+    }
+
+    // Loop through every day of the month.
+    for (let i = 0; i < numberOfDays; i++) {
+
+        const currentDay = startDate.clone().add(i, "days");
         const dayCode = currentDay.format("ddd");
 
         availableShifts.forEach((shift) => {
@@ -433,7 +443,6 @@ function buildShiftEvents(month) {
             const shiftParts = shift.id.split(":");
             const shiftDay = shiftParts[0];
             const shiftType = shiftParts[1];
-            const shiftNumber = shiftParts[2];
 
             // display shifts according to the weeks.
             if (shiftDay !== dayCode) {
@@ -443,13 +452,14 @@ function buildShiftEvents(month) {
             // check date range
             const shiftStartDate = shift.shiftDate?.StartDate;
             const shiftEndDate = shift.shiftDate?.EndDate;
-            const currentDate = currentDay.format("YYYY-MM-DD");
+            const currentDateString = currentDay.format("YYYY-MM-DD");
 
             //display the shift inside start and end dates
-            if (shiftStartDate && currentDate < shiftStartDate) {
+            if (shiftStartDate && currentDateString < shiftStartDate) {
                 return;
             }
-            if (shiftEndDate && currentDate > shiftEndDate) {
+
+            if (shiftEndDate && currentDateString > shiftEndDate) {
                 return;
             }
 
@@ -466,8 +476,7 @@ function buildShiftEvents(month) {
                 N: "Night"
             };
 
-            const shiftName =
-                shiftNames[shiftType] || shiftType;
+            const shiftName = shiftNames[shiftType] || shiftType;
 
             events.push({
                 eventName:
@@ -478,11 +487,9 @@ function buildShiftEvents(month) {
                 shiftEnd: endTime,
                 color: "orange",
                 date: currentDay.clone()
-
             });
 
         });
-
     }
 
     //sort events by start time
@@ -491,7 +498,6 @@ function buildShiftEvents(month) {
     });
 
     return events;
-
 }
 
 export function formatShiftTime(time) {
@@ -790,7 +796,11 @@ function drawAvailableShiftEvents() {
 
     const calendar = window.scheduleCalendar;
 
-    calendar.events = buildShiftEvents(calendar.current);
+    // calendar.events = buildShiftEvents(calendar.current);
+    calendar.events = buildShiftEvents(
+        calendar.current,
+        calendar.calendarPeriod
+    );
 
     calendar.draw();
 }
@@ -799,7 +809,11 @@ function drawSchedulingEvents() {
     if (!window.scheduleCalendar) return;
 
     const calendar = window.scheduleCalendar;
-    const events = buildShiftEvents(calendar.current);
+    // const events = buildShiftEvents(calendar.current);
+    const events = buildShiftEvents(
+        calendar.current,
+        calendar.calendarPeriod
+    );
 
     events.forEach(event => {
         const key = getShiftKey(event.shiftID, event.date);

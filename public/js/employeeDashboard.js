@@ -721,34 +721,27 @@ availabilityForm.addEventListener("submit", async (event) => {
             return;
         }
 
-        const newAvailability = {
-            id: doc(db, "userInfo", currentUserDocID),
+        const availabilityRequest = {
+            reqType: "availabilityChange",
+            Status: "Pending",
+            UserID: currentUserDocID,
+            Name: currentUserInfo.Name || sessionStorage.getItem("Name") || "",
             StartDate: Timestamp.fromDate(effectiveDate),
-            DayTimeAvail: dayTimeAvail
+            DayTimeAvail: dayTimeAvail,
+            submittedAt: new Date()
         };
-
-        // make new doc, prevent overwrite of current availability
-        await addDoc(availabilityCollection, newAvailability);
-
-        // Refresh availability records
-        const updatedSnapshot = await getDocs(
-            query(
-                availabilityCollection,
-                where("id", "==", doc(db, "userInfo", currentUserDocID))
-            )
+        
+        // Submit a request instead of changing active availability
+        await addDoc(
+            collection(db, "Requests"),
+            availabilityRequest
         );
         
-        availabilityRecords = updatedSnapshot.docs.map(item => ({
-            docID: item.id,
-            ...item.data()
-        }));
-
-        displayAvailability();
-
+        availabilityForm.reset();
         availabilityForm.style.display = "none";
         editAvailabilityBtn.style.display = "block";
-
-        alert("Your new availability has been saved!");
+        
+        alert("Your availability change has been submitted for manager approval.");
 
     } catch (error) {
         console.error("Availability update error:", error);

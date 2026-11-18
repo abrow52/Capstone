@@ -35,6 +35,16 @@
   box-sizing: border-box;
 }
 
+/* Day view: use the full calendar width for one day */
+#calendar .day-period .week {
+  grid-template-columns: 1fr;
+}
+
+/* Week view: show seven equal-width days */
+#calendar .week-period .week {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
 .header {
   height: 50px;
   width: 100%;
