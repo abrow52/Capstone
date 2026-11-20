@@ -661,6 +661,35 @@ async function deleteShiftAndAssignments(shiftID, selectedDate, scope = "single"
 
         const deleteAll = scope === "all" && !isStandaloneShift;
 
+        const shiftsSnapshot = await getDocs(collection(db, "shifts"));
+
+        const selectedParts = shiftID.split(":");
+        const originalStart = shiftData.ShiftTime?.StartTime;
+        const originalEnd = shiftData.ShiftTime?.EndTime;
+
+        let targetShiftIDs = [shiftID];
+
+        if (scope === "all" && !isDateSpecificShift) {
+            targetShiftIDs = shiftsSnapshot.docs
+                .filter(item => {
+                    const data = item.data();
+                    const parts = item.id.split(":");
+
+                    return (
+                        parts.length === 3 &&
+                        selectedParts.length === 3 &&
+                        parts[0] === selectedParts[0] &&
+                        data.ShiftTime?.StartTime === originalStart &&
+                        data.ShiftTime?.EndTime === originalEnd
+                    );
+                })
+                .map(item => item.id);
+        }
+
+        const targetShiftPaths = new Set(
+            targetShiftIDs.map(id => doc(db, "shifts", id).path)
+        );
+
         const scheduleSnapshot = await getDocs(
             collection(db, "schedule")
         );
@@ -714,7 +743,7 @@ async function deleteShiftAndAssignments(shiftID, selectedDate, scope = "single"
 
                 const matchingSlots = Object.entries(daySchedule)
                     .filter(([slotName, slot]) =>
-                        slot?.ShiftID?.path === shiftRef.path
+                        targetShiftPaths.has(slot?.ShiftID?.path)
                     );
 
                 if (matchingSlots.length === 0) continue;
@@ -725,6 +754,7 @@ async function deleteShiftAndAssignments(shiftID, selectedDate, scope = "single"
                     if (slot.Associate) {
                         assignedEmployees.push({
                             employeeRef: slot.Associate,
+                            shiftID: slot.ShiftID.id,
                             date: shiftDate.clone()
                         });
                     }
@@ -797,7 +827,18 @@ async function deleteShiftAndAssignments(shiftID, selectedDate, scope = "single"
         let batch = writeBatch(db);
         let writeCount = 0;
 
-        if (deleteAll || isStandaloneShift) {
+        if (deleteAll) {
+            for (const id of targetShiftIDs) {
+                if (writeCount >= 450) {
+                    await batch.commit();
+                    batch = writeBatch(db);
+                    writeCount = 0;
+                }
+        
+                batch.delete(doc(db, "shifts", id));
+                writeCount++;
+            }
+        } else if (isStandaloneShift) {
             batch.delete(shiftRef);
             writeCount++;
         } else {
@@ -832,7 +873,7 @@ async function deleteShiftAndAssignments(shiftID, selectedDate, scope = "single"
         if (deleteAll) {
             namedAssignments.forEach(assignment => {
                 savedAssignments.delete(
-                    getShiftKey(shiftID, assignment.date)
+                    getShiftKey(assignment.shiftID, assignment.date)
                 );
             });
         } else {
@@ -841,10 +882,10 @@ async function deleteShiftAndAssignments(shiftID, selectedDate, scope = "single"
             );
         }
 
-        const shiftsSnapshot = await getDocs(collection(db, "shifts"));
+        const refreshedShifts = await getDocs(collection(db, "shifts"));
 
 
-        const updatedShifts = shiftsSnapshot.docs.map(shiftDoc => ({
+        const updatedShifts = refreshedShifts.docs.map(shiftDoc => ({
             id: shiftDoc.id,
             shiftTime: shiftDoc.data().ShiftTime,
             shiftDate: shiftDoc.data().ShiftDate || {},

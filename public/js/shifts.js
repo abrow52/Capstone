@@ -1,6 +1,7 @@
 import { db } from "./firebase.js";
 import {collection, getDocs, getDoc, setDoc, doc, runTransaction, updateDoc, writeBatch} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { initializeShiftManagement, handleShiftEditSubmit } from "./shiftManagement.js";
+import { loadCalendarEvents } from "./calendar.js";
 
 let scheduleMode = false;
 let shiftMode = false;
@@ -431,7 +432,7 @@ function exitShiftMode() {
 }
 
 //exit scheduling mode
-function exitScheduleMode() {
+async function exitScheduleMode() {
 
     scheduleMode = false;
 
@@ -446,8 +447,11 @@ function exitScheduleMode() {
     }
 
     window.scheduleCalendar.onMonthChange = null;
-    window.scheduleCalendar.events = window.normalCalendarEvents || [];
-    window.scheduleCalendar.draw();
+    try {
+        await loadCalendarEvents();
+    } catch (error) {
+        console.error("Error refreshing the calendar:", error);
+    }
 
     scheduleControls.style.display = "none";
     createScheduleBtn.style.display = "inline-block";

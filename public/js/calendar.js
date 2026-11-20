@@ -569,7 +569,7 @@ if (currentUserName) {
 }();
 
 //display shifts
-async function loadCalendarEvents() {
+export async function loadCalendarEvents() {
   const currentUserID = sessionStorage.getItem("userID");
 
   if (!currentUserID) {
@@ -722,7 +722,13 @@ async function loadCalendarEvents() {
 
   window.normalCalendarEvents = data;
 
-  window.scheduleCalendar = new Calendar("#calendar", data);
+  if (window.scheduleCalendar) {
+      // refresh the existing calendar without resetting its view
+      window.scheduleCalendar.events = data;
+      window.scheduleCalendar.draw();
+  } else {
+      window.scheduleCalendar = new Calendar("#calendar", data);
+  }
 
   // const periodSelector = document.getElementById(
   //     "calendarPeriodView"
