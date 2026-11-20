@@ -111,6 +111,32 @@
     margin-bottom: 10px;
 }
 
+.employeeAvailability {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.employeeAvailability summary {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 8px 0;
+}
+
+.employeeAvailabilityContent {
+    padding: 10px;
+}
+
+.employeeAvailabilityContent h6 {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.employeeFutureAvailability {
+    border-top: 1px solid #eee;
+    padding: 10px 0;
+}
+
 @media (max-width: 768px) {
     .availability-container {
         grid-template-columns: 1fr;

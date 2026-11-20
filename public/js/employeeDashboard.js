@@ -348,13 +348,97 @@ editMyPassBtn.addEventListener("click", () => {
     changePassDiv.classList.toggle('hidden');
 });
 
+function displayEmployeeAvailability(card, records = []) {
+    const availabilitySection = document.createElement("details");
+    availabilitySection.className = "employeeAvailability";
+
+    const summary = document.createElement("summary");
+    summary.textContent = "Availability";
+
+    const content = document.createElement("div");
+    content.className = "employeeAvailabilityContent";
+
+    availabilitySection.append(summary, content);
+
+    const now = new Date();
+
+    const currentRecords = records
+        .filter(record =>
+            record.StartDate &&
+            record.StartDate.toDate() <= now
+        )
+        .sort((a, b) =>
+            b.StartDate.toMillis() - a.StartDate.toMillis()
+        );
+
+    const futureRecords = records
+        .filter(record =>
+            record.StartDate &&
+            record.StartDate.toDate() > now
+        )
+        .sort((a, b) =>
+            a.StartDate.toMillis() - b.StartDate.toMillis()
+        );
+
+    // Current availability
+    const currentHeading = document.createElement("h6");
+    currentHeading.textContent = "Current Availability";
+    content.appendChild(currentHeading);
+
+    if (currentRecords.length > 0) {
+        const currentRecord = currentRecords[0];
+
+        const effectiveDate = document.createElement("p");
+        effectiveDate.textContent =
+            `Effective: ${currentRecord.StartDate.toDate().toLocaleDateString()}`;
+
+        content.appendChild(effectiveDate);
+
+        displayDayTimes(content, currentRecord.DayTimeAvail);
+    } else {
+        const message = document.createElement("p");
+        message.textContent = "No current availability submitted.";
+        content.appendChild(message);
+    }
+
+    // Future approved availability changes
+    const futureHeading = document.createElement("h6");
+    futureHeading.textContent = "Future Availability Changes";
+    content.appendChild(futureHeading);
+
+    if (futureRecords.length === 0) {
+        const message = document.createElement("p");
+        message.textContent = "No upcoming availability changes.";
+        content.appendChild(message);
+    }
+
+    futureRecords.forEach(record => {
+        const futureCard = document.createElement("div");
+        futureCard.className = "employeeFutureAvailability";
+
+        const effectiveDate = document.createElement("p");
+        effectiveDate.textContent =
+            `Effective: ${record.StartDate.toDate().toLocaleDateString()}`;
+
+        futureCard.appendChild(effectiveDate);
+
+        displayDayTimes(futureCard, record.DayTimeAvail);
+
+        content.appendChild(futureCard);
+    });
+
+    card.appendChild(availabilitySection);
+}
+
 //load list of employees
 async function loadEmployeeDirectory() {
     const container = document.getElementById("employeeDirectory");
 
-    const [usersSnapshot, contactsSnapshot] = await Promise.all([
+    const [usersSnapshot, contactsSnapshot, availabilitySnapshot] =
+    await Promise.all([
         getDocs(userCollection),
-        getDocs(contactCollection)
+        getDocs(contactCollection),
+        getDocs(availabilityCollection)
     ]);
 
     console.log("Total user documents:", usersSnapshot.size);
@@ -362,6 +446,22 @@ async function loadEmployeeDirectory() {
 
     // match doc ids
     const contactsByUserID = new Map();
+
+    // get the right availability by useID
+    const availabilityByUserID = new Map();
+
+    availabilitySnapshot.docs.forEach(availabilityDoc => {
+        const record = availabilityDoc.data();
+        const linkedUserID = getLinkedUserID(record.id);
+
+        if (!linkedUserID) return;
+
+        if (!availabilityByUserID.has(linkedUserID)) {
+            availabilityByUserID.set(linkedUserID, []);
+        }
+
+        availabilityByUserID.get(linkedUserID).push(record);
+    });
 
     contactsSnapshot.docs.forEach(contactDoc => {
         const contact = contactDoc.data();
@@ -430,6 +530,14 @@ async function loadEmployeeDirectory() {
         });
 
         card.append(heading, details);
+
+        // Get employee's approved availability
+        const employeeAvailability =
+            availabilityByUserID.get(userDoc.id) || [];
+
+        // availability section
+        displayEmployeeAvailability(card, employeeAvailability);
+
         container.appendChild(card);
 
         displayedEmployees++;

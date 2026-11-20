@@ -91,18 +91,29 @@
     <div id = "home"> 
        <!-- left column : calendar -->
       <div class="calendar-section">
-          <!-- <div class="calendarBtns"> -->
-            <label for="calendarPeriodView">View:</label>
+          <div class="calendarBtns">
+            <div id="calendarPeriodButtons">
+              <button type="button" class="period-btn active" data-period="day">
+                  Day
+              </button>
+              <button type="button" class="period-btn" data-period="week">
+                  Week
+              </button>
+              <button type="button" class="period-btn" data-period="month">
+                  Month
+              </button>
+            </div>
+            <!-- <label for="calendarPeriodView">View:</label>
 
             <select id="calendarPeriodView">
                 <option value="day" selected>Day</option>
                 <option value="week">Week</option>
                 <option value="month">Month</option>
-            </select>
+            </select> -->
             <button id="toggleCalendarView" type="button">
                 Switch View
             </button>
-          <!-- </div> -->
+          </div>
           <div id="calendar"></div>
       </div>
       <!-- Right column : sidebar -->

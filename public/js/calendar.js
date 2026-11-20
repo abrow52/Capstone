@@ -1,4 +1,3 @@
-//this is where we are going to put all the code to grab from the database
 import {db} from "./firebase.js";
 import {collection, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
@@ -34,7 +33,11 @@ if (currentUserName) {
     var current = document.querySelector('.today');
   }
 
-  Calendar.prototype.draw = function() {
+  Calendar.prototype.draw = function(skipAnimation = false) {
+    if (skipAnimation) {
+        this.el.classList.add('no-redraw-animation');
+    }
+
     this.el.classList.toggle(
       'list-view',
       this.view === 'list'
@@ -85,6 +88,17 @@ if (currentUserName) {
         this.drawPeriod();
       }
     }
+    if (skipAnimation) {
+      requestAnimationFrame(() => {
+          this.el.classList.remove('no-redraw-animation');
+      });
+    }
+    window.dispatchEvent(new CustomEvent("calendarViewChanged", {
+      detail: {
+          current: this.current.clone(),
+          period: this.calendarPeriod
+      }
+    }));
   };
 
 
@@ -110,7 +124,6 @@ if (currentUserName) {
       this.el.appendChild(this.header);
     }
 
-    // this.title.innerHTML = this.current.format('MMMM YYYY');
     if (this.calendarPeriod === 'day') {
       this.title.textContent = this.current.format('dddd, MMMM D, YYYY');
     
@@ -292,6 +305,8 @@ if (currentUserName) {
       
               if (window.isScheduleMode && window.selectShiftForScheduling) {
                   window.selectShiftForScheduling(ev);
+              } else if (window.isShiftMode && window.selectShiftForEditing) {
+                  window.selectShiftForEditing(ev);
               }
           });
       
@@ -303,7 +318,6 @@ if (currentUserName) {
 
   //draw the calendar list view
   Calendar.prototype.drawAgenda = function() {
-    // Remove the previous list
     if (this.agenda) {
       this.agenda.remove();
     }
@@ -374,7 +388,9 @@ if (currentUserName) {
             event.stopPropagation();
 
             if (window.isScheduleMode && window.selectShiftForScheduling) {
-              window.selectShiftForScheduling(ev);
+                window.selectShiftForScheduling(ev);
+            } else if (window.isShiftMode && window.selectShiftForEditing) {
+                window.selectShiftForEditing(ev);
             }
           });
 
@@ -404,6 +420,7 @@ if (currentUserName) {
     this.el.appendChild(this.agenda);
 
     // make sure the current day can be seen in the window when in list view
+    // not perfect but works enough
     const todayRow = this.agenda.querySelector('#today-agenda-row');
 
     if (todayRow) {
@@ -552,7 +569,7 @@ if (currentUserName) {
 }();
 
 //display shifts
-async function loadCalendarEvents() {
+export async function loadCalendarEvents() {
   const currentUserID = sessionStorage.getItem("userID");
 
   if (!currentUserID) {
@@ -705,19 +722,49 @@ async function loadCalendarEvents() {
 
   window.normalCalendarEvents = data;
 
-  window.scheduleCalendar = new Calendar("#calendar", data);
+  if (window.scheduleCalendar) {
+      // refresh the existing calendar without resetting its view
+      window.scheduleCalendar.events = data;
+      window.scheduleCalendar.draw();
+  } else {
+      window.scheduleCalendar = new Calendar("#calendar", data);
+  }
 
-  const periodSelector = document.getElementById(
-      "calendarPeriodView"
-  );
+  // const periodSelector = document.getElementById(
+  //     "calendarPeriodView"
+  // );
 
-  if (periodSelector && !periodSelector.dataset.listenerAdded) {
-      periodSelector.dataset.listenerAdded = "true";
+  // if (periodSelector && !periodSelector.dataset.listenerAdded) {
+  //     periodSelector.dataset.listenerAdded = "true";
 
-      periodSelector.addEventListener("change", function() {
+  //     periodSelector.addEventListener("change", function() {
+  //         const calendar = window.scheduleCalendar;
+
+  //         calendar.calendarPeriod = periodSelector.value;
+
+  //         if (calendar.onMonthChange) {
+  //             calendar.onMonthChange();
+  //         }
+
+  //         calendar.draw();
+  //     });
+  // }
+  const periodButtons = document.querySelectorAll(".period-btn");
+
+  periodButtons.forEach(button => {
+      if (button.dataset.listenerAdded) return;
+
+      button.dataset.listenerAdded = "true";
+
+      button.addEventListener("click", function() {
           const calendar = window.scheduleCalendar;
 
-          calendar.calendarPeriod = periodSelector.value;
+          calendar.calendarPeriod = button.dataset.period;
+
+          // Update active button styling
+          periodButtons.forEach(btn => {
+              btn.classList.toggle("active", btn === button);
+          });
 
           if (calendar.onMonthChange) {
               calendar.onMonthChange();
@@ -725,7 +772,7 @@ async function loadCalendarEvents() {
 
           calendar.draw();
       });
-  }
+  });
 
   const toggleButton = document.getElementById(
       "toggleCalendarView"
@@ -810,6 +857,7 @@ export function formatTime(time) {
   }
 
   // Handle times stored as numbers.
+  //don't really need anymore but will keep just in case
   if (typeof time === "number") {
       const period = time >= 12 ? "PM" : "AM";
       const displayHour = time % 12 || 12;

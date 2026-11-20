@@ -45,6 +45,8 @@ body {
     display: flex;
     flex-direction: row;
     gap: 20px;
+    min-width: 0;
+    width: 100%;
 }
 
 #calendarFilter{
@@ -160,12 +162,20 @@ body {
 }
 
 #shiftCard{
-    margin-top: 20px;
+    border: none;
+    display: hidden;
+}
+
+#employeeAssignmentToggleContainer{
+    font-size: 12px;
 }
 
 /* create schedules */
-#scheduleModeControls {
+#scheduleModeControls, #shiftManagementPanel {
     width: 100%;
+    height: auto;
+    max-height: 90vh;
+    overflow-y: auto;
     margin-top: 15px;
     padding: 15px;
     border-radius: 7px;
@@ -174,18 +184,19 @@ body {
     box-sizing: border-box;
 }
 
-#scheduleModeControls h5 {
+
+#scheduleModeControls h5, #shiftManagementPanel h5 {
     font-size: 18px;
     margin-bottom: 10px;
 }
 
-#scheduleModeControls p {
+#scheduleModeControls p, #shiftManagementPanel p {
     font-size: 14px;
     line-height: 1.5;
     margin-bottom: 15px;
 }
 
-#exitScheduleMode {
+#exitScheduleMode, #exitShiftManagement {
     width: 100%;
     padding: 10px;
     margin-top: 20px;
@@ -217,6 +228,32 @@ body {
     box-sizing: border-box;
 }
 
+#calendarPeriodButtons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: end;
+}
+
+.period-btn {
+    padding: 8px 18px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: white;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.period-btn:hover {
+    background-color: #eee;
+}
+
+.period-btn.active {
+    background-color: #333;
+    color: white;
+    border-color: #333;
+}
 
 @media (max-width: 900px) {
     #home {
