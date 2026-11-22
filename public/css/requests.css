@@ -70,3 +70,19 @@
     margin: 0;
     flex-shrink: 0;
 }
+
+#leaveTypeSelect{
+    padding-bottom: 10px;
+}
+
+#option, #leaveTypeSelect{
+    display: flex;
+    flex-direction: column;
+}
+
+.timeOffTimes, .timeOffDates{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    padding-bottom: 10px;
+}

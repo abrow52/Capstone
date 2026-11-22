@@ -1,3 +1,4 @@
+//draw different claendars and shifts
 import { db } from "./firebase.js";
 import {collection, getDocs, getDoc, setDoc, doc, runTransaction, updateDoc, writeBatch} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { initializeShiftManagement, handleShiftEditSubmit } from "./shiftManagement.js";
@@ -13,20 +14,10 @@ const exitScheduleBtn = document.getElementById("exitScheduleMode");
 const scheduleControls = document.getElementById("scheduleModeControls");
 const showCreateShiftsBtn = document.getElementById("showCreateShifts");
 const shiftsForm = document.getElementById("shiftsbtn");
-const shiftManagementPanel = document.getElementById(
-    "shiftManagementPanel"
-);
-
-const createNewShiftBtn = document.getElementById(
-    "createNewShiftBtn"
-);
-
-const exitShiftManagementBtn = document.getElementById(
-    "exitShiftManagement"
-);
-
-const showEmployeeAssignmentsToggle =
-    document.getElementById("showEmployeeAssignments");
+const shiftManagementPanel = document.getElementById("shiftManagementPanel");
+const createNewShiftBtn = document.getElementById("createNewShiftBtn");
+const exitShiftManagementBtn = document.getElementById("exitShiftManagement");
+const showEmployeeAssignmentsToggle = document.getElementById("showEmployeeAssignments");
 
 let savedAssignments = new Map();
 let calendarViewRequestId = 0;
@@ -638,8 +629,14 @@ window.selectShiftForScheduling = async function(shiftEvent) {
     employeeList.textContent = "Loading available employees...";
 
     try {
-        const availabilitySnapshot =
-            await getDocs(collection(db, "availability"));
+        const [availabilitySnapshot, timeOffSnapshot] = await Promise.all([
+            getDocs(collection(db, "availability")),
+            getDocs(collection(db, "TimeOff"))
+        ]);
+        
+        const approvedTimeOffRecords = timeOffSnapshot.docs
+            .map(timeOffDoc => timeOffDoc.data())
+            .filter(record => record.Approved === true);
 
         const eligibleEmployees = [];
 
@@ -691,10 +688,22 @@ window.selectShiftForScheduling = async function(shiftEvent) {
 
             const userData = userDoc.data();
 
-            eligibleEmployees.push({
+            const employee = {
                 id: userDoc.id,
                 name: userData.Name || userDoc.id
-            });
+            };
+
+            // Don't show employees who have approved timeOff
+            if (hasApprovedTimeOff(employee.id, shiftEvent, approvedTimeOffRecords)) {
+                continue;
+            }
+
+            // Don't show employees who already have an overlapping shift
+            if (hasEmployeeOverlappingShift(employee.id, shiftEvent)) {
+                continue;
+            }
+
+            eligibleEmployees.push(employee);
         }
 
         if (eligibleEmployees.length === 0) {
@@ -747,9 +756,142 @@ function timeToMinutes(time) {
   
     return null;
 }
+
+//acknowledge timeoff reqs and avoid scheduling employyes for a shift at that time
+function hasApprovedTimeOff(employeeID, shiftEvent, timeOffRecords) {
+    const shiftDate = shiftEvent.date.format("YYYY-MM-DD");
+
+    const shiftStart = timeToMinutes(shiftEvent.shiftStart);
+    const shiftEnd = timeToMinutes(shiftEvent.shiftEnd);
+
+    return timeOffRecords.some(record => {
+        if (record.Approved !== true) return false;
+
+        if (record.id?.path !== `userInfo/${employeeID}`) {
+            return false;
+        }
+
+        const startDate = record.StartDayTime;
+        const endDate = record.EndDayTime;
+
+        if (!startDate || !endDate) return false;
+
+        if (shiftDate < startDate || shiftDate > endDate) {
+            return false;
+        }
+
+        // no times means full day off
+        if (!record.StartTime || !record.EndTime) {
+            return true;
+        }
+
+        const timeOffStart = timeToMinutes(record.StartTime);
+        const timeOffEnd = timeToMinutes(record.EndTime);
+
+        if (!Number.isFinite(timeOffStart) || !Number.isFinite(timeOffEnd)) {
+            return true;
+        }
+
+        // Check whether the shift overlaps the requested time off.
+        return shiftStart < timeOffEnd &&
+               timeOffStart < shiftEnd;
+    });
+}
   
 function shiftsOverlap(startA, endA, startB, endB) {
     return startA < endB && startB < endA;
+}
+
+//check assigned shifts along with pending to prevent overlapping assignments
+function hasEmployeeOverlappingShift(employeeID, shiftEvent) {
+    const dateKey = shiftEvent.date.format("YYYY-MM-DD");
+    const targetKey = getShiftKey(shiftEvent.shiftID, shiftEvent.date);
+
+    const checkedKeys = new Set();
+
+    const overlapsTarget = (start, end) => {
+        const otherStart = timeToMinutes(start);
+        const otherEnd = timeToMinutes(end);
+
+        if (
+            !Number.isFinite(otherStart) ||
+            !Number.isFinite(otherEnd) ||
+            otherEnd <= otherStart
+        ) {
+            return false;
+        }
+
+        return shiftsOverlap(
+            timeToMinutes(shiftEvent.shiftStart),
+            timeToMinutes(shiftEvent.shiftEnd),
+            otherStart,
+            otherEnd
+        );
+    };
+
+    // check saved assingments and pending assignments
+    for (const [key, saved] of savedAssignments) {
+        if (
+            key === targetKey ||
+            !key.startsWith(`${dateKey}|`)
+        ) {
+            continue;
+        }
+
+        const pending = pendingAssignments.find(item =>
+            getShiftKey(item.shiftID, item.date) === key
+        );
+
+        checkedKeys.add(key);
+
+        // pending change replaces the saved assignment
+        if (pending) {
+            if (
+                pending.employeeID === employeeID &&
+                overlapsTarget(pending.shiftStart, pending.shiftEnd)
+            ) {
+                return true;
+            }
+
+            continue;
+        }
+
+        if (saved.employeeID !== employeeID) continue;
+
+        const otherShiftID = key.slice(dateKey.length + 1);
+        const otherShift = availableShifts.find(
+            shift => shift.id === otherShiftID
+        );
+
+        if (
+            otherShift &&
+            overlapsTarget(
+                otherShift.shiftTime?.StartTime,
+                otherShift.shiftTime?.EndTime
+            )
+        ) {
+            return true;
+        }
+    }
+
+    for (const pending of pendingAssignments) {
+        const key = getShiftKey(pending.shiftID, pending.date);
+
+        if (
+            key === targetKey ||
+            checkedKeys.has(key) ||
+            !pending.date.isSame(shiftEvent.date, "day") ||
+            pending.employeeID !== employeeID
+        ) {
+            continue;
+        }
+
+        if (overlapsTarget(pending.shiftStart, pending.shiftEnd)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 //pending assignments
@@ -761,29 +903,9 @@ function stageAssignment(employee, shiftEvent) {
     );
 
     // prevent overlap for pending assignments
-    const newStart = timeToMinutes(shiftEvent.shiftStart);
-    const newEnd = timeToMinutes(shiftEvent.shiftEnd);
-
-    const overlappingAssignment = pendingAssignments.find(item => {
-        if (
-            item.employeeID !== employee.id ||
-            !item.date.isSame(shiftEvent.date, "day") ||
-            item.shiftID === shiftEvent.shiftID
-        ) {
-            return false;
-        }
-
-        return shiftsOverlap(
-            newStart,
-            newEnd,
-            timeToMinutes(item.shiftStart),
-            timeToMinutes(item.shiftEnd)
-        );
-    });
-
-    if (overlappingAssignment) {
-        alert(`${employee.name} already has an overlapping pending shift.`);
-        return;
+    if (hasEmployeeOverlappingShift(employee.id, shiftEvent)) {
+        alert(`${employee.name} already has an overlapping shift.`);
+        return false;
     }
 
     const assignment = {
@@ -816,6 +938,8 @@ function stageAssignment(employee, shiftEvent) {
         event.isAssigned = true;
     
         updateShiftEventInPlace(event);
+
+        return true;
     }
 }
 
@@ -1032,7 +1156,52 @@ async function saveSchedule() {
 
     try {
         if (saveButton) saveButton.disabled = true;
+    
+        // Refresh saved assignments before validating.
+        await loadSavedAssignments();
 
+        // Load approved time-off records before validating assignments.
+        const timeOffSnapshot = await getDocs(collection(db, "TimeOff"));
+
+        const approvedTimeOffRecords = timeOffSnapshot.docs
+            .map(timeOffDoc => timeOffDoc.data())
+            .filter(record => record.Approved === true);
+    
+        // Check every pending assignment for overlaps.
+        for (const assignment of pendingAssignments) {
+            if (!assignment.employeeID) continue;
+    
+            const employee = {
+                id: assignment.employeeID,
+                name: assignment.employeeName
+            };
+    
+            const shiftEvent = {
+                shiftID: assignment.shiftID,
+                date: assignment.date,
+                shiftStart: assignment.shiftStart,
+                shiftEnd: assignment.shiftEnd
+            };
+
+            //if a timeoff req is approved while there is a pending shift assignment for the same time period
+            if (hasApprovedTimeOff(employee.id, shiftEvent,approvedTimeOffRecords)) {
+                alert(
+                    `${employee.name} has approved time off that conflicts with ` +
+                    `the ${assignment.shiftID} shift on ${assignment.date.format("YYYY-MM-DD")}. ` +
+                    `Please correct the assignment before saving.`
+                );
+                return;
+            }
+    
+            if (hasEmployeeOverlappingShift(employee.id, shiftEvent)) {
+                alert(
+                    `${employee.name} has overlapping shifts. ` +
+                    `Please correct the assignments before saving.`
+                );
+                return;
+            }
+        }
+    
         // group shifts based on week
         const weeklyAssignments = {};
 
@@ -1247,7 +1416,39 @@ if (saveScheduleBtn) {
     saveScheduleBtn.addEventListener("click", saveSchedule);
 }
 
-//connection to other file
+const cancelPendingBtn = document.getElementById("cancelPendingBtn");
+
+if (cancelPendingBtn) {
+    cancelPendingBtn.addEventListener("click", () => {
+        if (pendingAssignments.length === 0) {
+            alert("There are no pending changes to cancel.");
+            return;
+        }
+
+        const confirmed = confirm(
+            "Are you sure you want to cancel all pending schedule changes?"
+        );
+
+        if (!confirmed) return;
+
+        // delete all pending changes to the schedule
+        pendingAssignments = [];
+
+        const assignmentPanel = document.getElementById("shiftAssignmentPanel");
+        const employeeList = document.getElementById("availableEmployees");
+        const details = document.getElementById("selectedShiftDetails");
+
+        if (assignmentPanel) assignmentPanel.style.display = "none";
+        if (employeeList) employeeList.textContent = "Select a shift on the calendar.";
+        if (details) details.innerHTML = "";
+
+        drawSchedulingEvents();
+
+        alert("All pending changes have been cancelled.");
+    });
+}
+
+//connection to shiftManagements.js
 initializeShiftManagement({
     getAvailableShifts: () => availableShifts,
     setAvailableShifts: (shifts) => {
@@ -1262,3 +1463,157 @@ initializeShiftManagement({
     shiftsForm: shiftsForm,
     hideForm: hideForm
 });
+
+
+// Read only connection for the auto-scheduler
+window.autoSchedulerBridge = {
+    getSchedulingState() {
+        return {
+            savedAssignments: Array.from(
+                savedAssignments.entries()
+            ).map(([key, assignment]) => ({
+                key,
+                employeeID: assignment.employeeID,
+                employeeName: assignment.employeeName
+            })),
+
+            pendingAssignments: pendingAssignments.map(assignment => ({
+                employeeID: assignment.employeeID,
+                employeeName: assignment.employeeName,
+                shiftID: assignment.shiftID,
+                date: assignment.date.format("YYYY-MM-DD"),
+                shiftStart: assignment.shiftStart,
+                shiftEnd: assignment.shiftEnd
+            })),
+
+            availableShifts: availableShifts.map(shift => ({
+                id: shift.id,
+                shiftTime: shift.shiftTime,
+                shiftDate: shift.shiftDate,
+                excludedDates: [...(shift.excludedDates || [])]
+            }))
+        };
+    },
+
+    stageGeneratedAssignments(assignments, options) {
+        if (!scheduleMode || !window.scheduleCalendar) {
+            throw new Error(
+                "Please open Schedule mode before generating assignments."
+            );
+        }
+
+        const {
+            existingOption,
+            startDate,
+            endDate
+        } = options;
+
+        const start = moment(startDate, "YYYY-MM-DD", true);
+        const end = moment(endDate, "YYYY-MM-DD", true);
+
+        if (!start.isValid() || !end.isValid() || end.isBefore(start, "day")) {
+            throw new Error("The selected date range is invalid.");
+        }
+
+        // Validate generated shifts
+        for (const assignment of assignments) {
+            const shift = availableShifts.find(
+                item => item.id === assignment.shiftID
+            );
+
+            if (!shift?.shiftTime) {
+                throw new Error(
+                    `Unable to find shift template ${assignment.shiftID}.`
+                );
+            }
+
+            if (!assignment.employeeID) {
+                throw new Error("A generated assignment is missing an employee.");
+            }
+        }
+
+        const savedInRange = [];
+
+        if (existingOption === "replace") {
+            for (const [key] of savedAssignments) {
+                const separator = key.indexOf("|");
+                const dateString = key.slice(0, separator);
+                const shiftID = key.slice(separator + 1);
+                const date = moment(dateString, "YYYY-MM-DD", true);
+
+                if (!date.isValid() || date.isBefore(start, "day") ||
+                    date.isAfter(end, "day")) {
+                    continue;
+                }
+
+
+                // const templateID = shiftID.split(":ONE:")[0];
+
+                const shift = availableShifts.find(
+                    item => item.id === shiftID
+                    // item => item.id === shiftID || item.id === templateID
+                );
+
+                if (!shift?.shiftTime) {
+                    throw new Error(
+                        `Unable to find the shift template for ${shiftID} on ${dateString}.`
+                    );
+                }
+
+                savedInRange.push({
+                    shiftID,
+                    date,
+                    shiftStart: shift.shiftTime.StartTime,
+                    shiftEnd: shift.shiftTime.EndTime
+                });
+            }
+
+            pendingAssignments = pendingAssignments.filter(item =>
+                item.date.isBefore(start, "day") ||
+                item.date.isAfter(end, "day")
+            );
+
+            savedInRange.forEach(shiftEvent => {
+                stageUnassignment(shiftEvent);
+            });
+        }
+
+        const stagedAssignments = [];
+        const failedAssignments = [];
+
+        assignments.forEach(assignment => {
+            const shift = availableShifts.find(
+                item => item.id === assignment.shiftID
+            );
+
+            const employee = {
+                id: assignment.employeeID,
+                name: assignment.employeeName || "Unknown Employee"
+            };
+
+            const shiftEvent = {
+                shiftID: assignment.shiftID,
+                shiftType: assignment.shiftType,
+                date: moment(assignment.date, "YYYY-MM-DD", true),
+                shiftStart: shift.shiftTime.StartTime,
+                shiftEnd: shift.shiftTime.EndTime
+            };
+
+            const succeeded = stageAssignment(employee, shiftEvent);
+
+            if (succeeded) {
+                stagedAssignments.push(assignment);
+            } else {
+                failedAssignments.push(assignment);
+            }
+        });
+
+        // redraw calendar with the changes
+        drawSchedulingEvents();
+
+        return {
+            stagedCount: stagedAssignments.length,
+            failedAssignments
+        };
+    }
+};
