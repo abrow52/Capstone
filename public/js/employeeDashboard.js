@@ -134,7 +134,8 @@ function displayMyInformation() {
         ["Title", currentUserInfo.Title],
         ["Email", currentContactInfo.Email],
         ["Phone", currentContactInfo.PhoneNumber],
-        ["Address", currentContactInfo.Address]
+        ["Address", currentContactInfo.Address],
+        ["Weekly Hours", currentUserInfo.Hours]
     ];
 
     fields.forEach(([label, value]) => {
@@ -144,7 +145,7 @@ function displayMyInformation() {
         strong.textContent = `${label}: `;
         paragraph.append(
             strong,
-            document.createTextNode(value || "Not provided")
+            document.createTextNode(value ?? "Not provided")
         );
 
         myInformationContainer.appendChild(paragraph);
@@ -177,6 +178,15 @@ function editMyInformation() {
             label: "Address",
             id: "editAddress",
             value: currentContactInfo.Address
+        },
+        {
+            label: "Weekly Hours",
+            id: "editHours",
+            value: currentUserInfo.Hours,
+            type: "number",
+            required: true,
+            min: 0,
+            step: 1
         }
     ];
 
@@ -196,8 +206,16 @@ function editMyInformation() {
         input.type = field.type || "text";
         input.id = field.id;
         input.className = "form-control";
-        input.value = field.value || "";
+        input.value = field.value ?? "";
         input.required = Boolean(field.required);
+
+        if (field.min !== undefined) {
+            input.min = field.min;
+        }
+
+        if (field.step !== undefined) {
+            input.step = field.step;
+        }
 
         wrapper.append(label, input);
         editForm.appendChild(wrapper);
@@ -231,6 +249,19 @@ function editMyInformation() {
         try {
             const newName =
                 document.getElementById("editName").value.trim();
+            
+            const newHours = Number(
+                document.getElementById("editHours").value
+            );
+            
+            if (
+                document.getElementById("editHours").value.trim() === "" ||
+                !Number.isInteger(newHours) ||
+                newHours < 0
+            ) {
+                alert("Please enter a valid whole number for weekly hours.");
+                return;
+            }
 
             const newContact = {
                 Address: document.getElementById("editAddress").value.trim(),
@@ -244,10 +275,13 @@ function editMyInformation() {
                 return;
             }
 
-            // update name
+            // update name and/or hours
             await updateDoc(
                 doc(db, "userInfo", currentUserDocID),
-                { Name: newName }
+                {
+                    Name: newName,
+                    Hours: newHours
+                }
             );
 
             // update or create contact info
@@ -266,6 +300,7 @@ function editMyInformation() {
             }
 
             currentUserInfo.Name = newName;
+            currentUserInfo.Hours = newHours;
             currentContactInfo = newContact;
 
             sessionStorage.setItem("Name", newName);
@@ -512,7 +547,8 @@ async function loadEmployeeDirectory() {
             ["Title", employee.Title],
             ["Email", contact.Email],
             ["Phone", contact.PhoneNumber],
-            ["Address", contact.Address]
+            ["Address", contact.Address],
+            ["Weekly Hours", employee.Hours]
         ];
 
         fields.forEach(([label, value]) => {
