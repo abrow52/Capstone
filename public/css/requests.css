@@ -101,7 +101,12 @@
 
 #reqFormBtn button, 
 #reqDropShiftForm button,
-#reqTimeOffForm button  {
+#reqTimeOffForm button, 
+#createNewShiftBtn, 
+#exitShiftManagement, 
+#exitScheduleMode, 
+#saveScheduleBtn, 
+#GenerateButton {
     border-radius: 8px;
     padding: 9px 8px;
     background: #f1f1f1;
@@ -116,7 +121,12 @@
 
 #reqFormBtn button:hover, 
 #reqDropShiftForm button:hover,
-#reqTimeOffForm button:hover{
+#reqTimeOffForm button:hover, 
+#createNewShiftBtn:hover, 
+#exitShiftManagement:hover, 
+#exitScheduleMode:hover,
+#saveScheduleBtn:hover,
+#GenerateButton:hover{
     background-color: #2196F3; 
     color: white; 
 }
@@ -197,4 +207,73 @@
 .calendarPeriodButtons .period-btn.active {
     background: #2196F3;
     color: white;
+}
+
+#employeeAssignmentToggleContainer {
+    display: flex;
+    justify-content: flex-start;
+    margin: 10px 0;
+}
+
+#employeeAssignmentToggleContainer label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #444;
+    cursor: pointer;
+}
+
+/* Toggle container */
+.assignment-switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 21px;
+}
+
+/* Hide default checkbox */
+.assignment-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Toggle background */
+.assignment-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #ccc;
+    border-radius: 20px;
+    transition: 0.3s;
+}
+
+/* Toggle circle */
+.assignment-slider:before {
+    content: "";
+    position: absolute;
+    height: 15px;
+    width: 15px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+/* When checked */
+.assignment-switch input:checked + .assignment-slider {
+    background-color: #2196F3;
+}
+
+.assignment-switch input:checked + .assignment-slider:before {
+    transform: translateX(17px);
+}
+
+/* Keyboard focus */
+.assignment-switch input:focus-visible + .assignment-slider {
+    outline: 2px solid #2196F3;
+    outline-offset: 3px;
 }
