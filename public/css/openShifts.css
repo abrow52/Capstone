@@ -7,7 +7,7 @@
     border-radius: 8px;
     color: black;
     min-height: 150px;
-    box-shadow: 0px 0px 10px 4px rgb(80, 78, 78);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
 }
 
 .openShifts h5{
@@ -19,6 +19,11 @@
   display:flex;
   align-items: center;
   justify-content: space-between;
+    background-color: #f9fafb;
+    border: 1px solid #e2e5e9;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
 .shiftInfo p {
@@ -29,15 +34,16 @@
   display: block;
   margin: 12px 10px;
   padding: 9px 12px;
-  border: 1px solid #9ca3af;
+  border: 1px solid #ddd;
   border-radius: 6px;
-  background: white;
+  background: #f1f1f1;
   color: #111827;
   cursor: pointer;
 }
 
 .PickUpButton:hover{
-  background-color: #f3f4f6;
+    background-color: #2196F3; 
+    color: white;
 }
 
 #shiftRequests {

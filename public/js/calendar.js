@@ -10,7 +10,7 @@ const currentTitle = sessionStorage.getItem("Title");
 
 if(currentTitle === "Manager"){
     document.getElementById("managerLink").style.display = "block";
-    document.getElementById("requestsLink").style.display = "block";
+    // document.getElementById("requestsLink").style.display = "block";
   }
 
 if (currentUserName) {
@@ -774,22 +774,41 @@ export async function loadCalendarEvents() {
       });
   });
 
-  const toggleButton = document.getElementById(
-      "toggleCalendarView"
-  );
+  // const toggleButton = document.getElementById("calendarViewToggle");
 
-  if (toggleButton && !toggleButton.dataset.listenerAdded) {
-      toggleButton.dataset.listenerAdded = "true";
+  // if (toggleButton && !toggleButton.dataset.listenerAdded) {
+  //     toggleButton.dataset.listenerAdded = "true";
 
-      toggleButton.addEventListener("click", function() {
-          window.scheduleCalendar.toggleView();
+  //     toggleButton.addEventListener("change", function() {
+  //         window.scheduleCalendar.toggleView();
 
-          toggleButton.textContent =
-              window.scheduleCalendar.view === "list"
-                  ? "Switch to Calendar View"
-                  : "Switch to List View";
-      });
-  }
+  //         console.log("Toggle Button hit and function accessed")
+
+  //         // toggleButton.textContent =
+  //         //     window.scheduleCalendar.view === "list"
+  //         //         ? "Switch to Calendar View"
+  //         //         : "Switch to List View";
+  //     });
+  // }
+
+  const toggleButton = document.getElementById("calendarViewToggle");
+
+if (toggleButton && !toggleButton.dataset.listenerAdded) {
+    toggleButton.dataset.listenerAdded = "true";
+
+    toggleButton.addEventListener("change", function() {
+
+        console.log("Calendar toggle changed!");
+
+        if (window.scheduleCalendar) {
+            window.scheduleCalendar.toggleView();
+
+            console.log("Toggle function accessed!");
+        } else {
+            console.error("scheduleCalendar is not defined!");
+        }
+    });
+}
 }
 
 //display open shifts
@@ -869,6 +888,14 @@ export function formatTime(time) {
 
   return String(time);
 }
+
+document.getElementById("logoutBtn").addEventListener("click", function() {
+
+    sessionStorage.clear();
+
+    window.location.href = "/login";
+
+});
 
 loadCalendarEvents();
 

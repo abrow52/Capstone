@@ -8,7 +8,7 @@ const currentUserID = sessionStorage.getItem("userID");
 const currentUserName = sessionStorage.getItem("Name");
 const currentTitle = sessionStorage.getItem("Title");
 
-async function ManagerloadShiftRequests() {
+export async function ManagerloadShiftRequests() {
     const weekdays = [
         "Sunday",
         "Monday",
@@ -19,11 +19,19 @@ async function ManagerloadShiftRequests() {
         "Saturday"
     ];
 
+    const pendingDiv = document.getElementById("pendingReqs");
+    const approvedDiv = document.getElementById("approvedReqs");
+    const deniedDiv = document.getElementById("deniedReqs");
+
+    pendingDiv.innerHTML = "";
+    approvedDiv.innerHTML = "";
+    deniedDiv.innerHTML = "";
+
     const snapshot = await getDocs(collection(db, "Requests"));
 
-    const container = document.getElementById("requestList");
+    // const container = document.getElementById("requestList");
 
-    container.innerHTML = "";
+    // container.innerHTML = "";
 
     const template = document.getElementById("requestTemplate");
 
@@ -285,8 +293,32 @@ async function ManagerloadShiftRequests() {
             }
         });
 
-        container.appendChild(card);
-    }
-}
+        if (request.Status === "Pending") {
+            pendingDiv.appendChild(card);
 
-ManagerloadShiftRequests();
+        } else if (request.Status === "Approved") {
+            approveButton.remove();
+            denyButton.remove();
+
+            approvedDiv.appendChild(card);
+
+        } else if (request.Status === "Denied") {
+            approveButton.remove();
+            denyButton.remove();
+
+            deniedDiv.appendChild(card);
+        }
+    }
+
+    if (!pendingDiv.hasChildNodes()) {
+        pendingDiv.textContent = "No pending requests.";
+    }
+
+    if (!approvedDiv.hasChildNodes()) {
+        approvedDiv.textContent = "No approved requests.";
+    }
+
+    if (!deniedDiv.hasChildNodes()) {
+        deniedDiv.textContent = "No denied requests.";
+}
+}

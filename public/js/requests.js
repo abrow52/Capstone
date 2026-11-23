@@ -3,6 +3,7 @@ import {collection, doc, setDoc, getDocs, getDoc, where, query, addDoc, deleteDo
 
 import { loadOpenShifts } from "./calendar.js";
 import { formatShiftTime } from "./shifts.js";
+import { ManagerloadShiftRequests } from "./managerRequest.js";
 
 const currentUserID = sessionStorage.getItem("userID");
 const currentUserName = sessionStorage.getItem("Name");
@@ -36,8 +37,13 @@ async function loadUserRequests() {
     deniedDiv.innerHTML = "";
 
     try {
-        // will need to change for manager view so they can see other employees requests
-        const requestsQuery = query(
+        // will need to change for manager view so they can see other employees 
+
+        if(currentTitle === "Manager") {
+            await ManagerloadShiftRequests();
+
+        } else if(currentTitle === "Associate") {
+                 const requestsQuery = query(
             collection(db, "Requests"),
             where("UserID", "==", currentUserID)
         );
@@ -126,7 +132,11 @@ async function loadUserRequests() {
 
         if (!deniedDiv.hasChildNodes()) {
             deniedDiv.textContent = "No denied requests.";
+        } 
+
         }
+
+  
 
     } catch (error) {
         console.error("Error loading requests:", error);
