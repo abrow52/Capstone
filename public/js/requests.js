@@ -108,9 +108,23 @@ async function loadUserRequests() {
                 dates.textContent =
                     "Dates: " + (request.startDate || "N/A") +
                     " to " + (request.endDate || "N/A");
+                
+                const times = document.createElement("p");
+                if (!request.StartTime && !request.EndTime){
+                    times.textContent = "Time: All Day"
+                } else {
+                    times.textContent =
+                    "Time: " + (formatShiftTime(request.StartTime) || "N/A") +
+                    " to " + (formatShiftTime(request.EndTime) || "N/A");
+                }
+                // times.textContent =
+                //     "Time: " + (formatShiftTime(request.StartTime) || "N/A") +
+                //     " to " + (formatShiftTime(request.EndTime) || "N/A");
+                
             
                 requestCard.appendChild(leaveType);
                 requestCard.appendChild(dates);
+                requestCard.appendChild(times);
             }
 
             if (request.Status === "Pending") {
@@ -158,6 +172,23 @@ reqTimeOffForm.addEventListener("submit", async (event) => {
     const leaveType = document.getElementById("leaveType").value.trim();
     const startDate = document.getElementById("startDate").value;
     const endDate = document.getElementById("endDate").value;
+    const startTime = document.getElementById("startTime").value;
+    const endTime = document.getElementById("endTime").value;
+
+    if ((startTime && !endTime) || (!startTime && endTime)) {
+        alert("Please enter both a start time and an end time, or leave both blank for full-day time off.");
+        return;
+    }
+
+    if (endDate < startDate) {
+        alert("The end date cannot be before the start date.");
+        return;
+    }
+
+    if (startTime && endTime && endTime <= startTime) {
+        alert("The end time must be later than the start time.");
+        return;
+    }
 
     try {
         // make a new doc
@@ -171,6 +202,8 @@ reqTimeOffForm.addEventListener("submit", async (event) => {
             leaveType: leaveType,
             startDate: startDate,
             endDate: endDate,
+            StartTime: startTime || "",
+            EndTime: endTime || "",
             submittedAt: new Date()
         });
     

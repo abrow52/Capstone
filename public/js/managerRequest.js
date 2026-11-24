@@ -50,11 +50,24 @@ export async function ManagerloadShiftRequests() {
             card.querySelector(".requestName").textContent =
                 "Associate: " + (request.Name || "Unknown");
 
-        card.querySelector(".requestDate").textContent =
-            "Start Date: " + request.startDate;
-
-        card.querySelector(".requestTime").textContent =
-            "End Date: " + request.endDate;
+        card.querySelector(".requestDate");
+        if (request.startDate === request.endDate){
+            card.querySelector(".requestDate").textContent =
+                "Date: " + request.startDate;
+        } else {
+            card.querySelector(".requestDate").textContent =
+                "Start Date: " + request.startDate +
+                " End Date: " + request.endDate;
+        }
+        
+        card.querySelector(".requestTime");
+        if (!request.StartTime && !request.EndTime){
+            card.querySelector(".requestTime").textContent =
+                "Time: All Day";
+        } else {
+            card.querySelector(".requestTime").textContent =
+                "Time: " + formatTime(request.StartTime) + " - " + formatTime(request.EndTime);
+        }
 
         card.querySelector(".requestStatus").textContent =
             "Status: " + request.Status;
@@ -203,6 +216,8 @@ export async function ManagerloadShiftRequests() {
                         DateSubmitted: new Date(), 
                         EndDayTime: request.endDate,
                         StartDayTime: request.startDate,
+                        StartTime: request.StartTime || "",
+                        EndTime: request.EndTime || "",
                         id: doc(db, "userInfo", request.UserID)
                         });
 

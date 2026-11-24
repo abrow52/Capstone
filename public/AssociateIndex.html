@@ -151,22 +151,38 @@
                 </form>
                 <!-- time off -->
                 <form id="reqTimeOffForm" style="display:none;">
-                  <h4>Request time off</h4>
-                  <label for="leaveType">Leave type</label>
-                  <select id="leaveType" name="leaveType" required="">
-                    <option value="">Select type</option>
-                    <option value="vacation">Vacation</option>
-                    <option value="sick">Sick leave</option>
-                    <option value="personal">Personal</option>
-                  </select>
+                  <h3>Request time off</h3>
+                  <div id="leaveTypeSelect">
+                    <label for="leaveType">Leave type</label>
+                    <select id="leaveType" name="leaveType" required="">
+                      <option value="">Select type</option>
+                      <option value="vacation">Vacation</option>
+                      <option value="sick">Sick leave</option>
+                      <option value="personal">Personal</option>
+                    </select>
+                  </div>
                   <div class="row">
-                    <div>
-                      <label for="startDate">Start date</label>
-                      <input type="date" id="startDate" name="startDate" required="">
+                    <div class="timeOffDates">
+                      <div id="option">
+                        <label for="startDate">Start date</label>
+                        <input type="date" id="startDate" name="startDate" required="">
+                      </div>
+                      <div id="option">
+                        <label for="endDate">End date</label>
+                        <input type="date" id="endDate" name="endDate" required="">
+                      </div>
                     </div>
-                    <div>
-                      <label for="endDate">End date</label>
-                      <input type="date" id="endDate" name="endDate" required="">
+                    <div class="row">
+                      <div class="timeOffTimes">
+                        <div id="option">
+                          <label for="startTime">Start time</label>
+                          <input type="time" id="startTime" name="startTime">
+                        </div>
+                        <div id="option">
+                          <label for="endTime">End Time</label>
+                          <input type="time" id="endTime" name="endTime">
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <button type="submit">Submit Request</button>

@@ -1,4 +1,4 @@
-
+//labor information 
 import { db } from "./firebase.js";
 import {collection, getDocs, getDoc} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
@@ -482,7 +482,7 @@ function updateShiftInfo(forceUpdate = false) {
     }
 }
 
-//opena and close panel
+//open and close panel
 if (infoButton && infoPanel) {
     infoButton.addEventListener("click", () => {
         infoPanel.style.display =

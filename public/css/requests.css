@@ -286,4 +286,18 @@
 .assignment-switch input:focus-visible + .assignment-slider {
     outline: 2px solid #2196F3;
     outline-offset: 3px;
+#leaveTypeSelect{
+    padding-bottom: 10px;
+}
+
+#option, #leaveTypeSelect{
+    display: flex;
+    flex-direction: column;
+}
+
+.timeOffTimes, .timeOffDates{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    padding-bottom: 10px;
 }

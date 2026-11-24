@@ -1,3 +1,5 @@
+//editing, deleting, and creating shifts
+
 import { db } from "./firebase.js";
 
 import {collection, getDocs, getDoc, doc, writeBatch, runTransaction} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
@@ -37,12 +39,7 @@ const deleteScopeSelect = document.getElementById("deleteScope");
 const editScopeSelect = document.getElementById("editScope");
 
 //safegaurd
-async function updateShiftAndCheckAssignments(
-    shiftIDs,
-    startTime,
-    endTime,
-    startDate,
-    endDate) {
+async function updateShiftAndCheckAssignments(shiftIDs, startTime, endTime, startDate, endDate) {
 
     const shiftRefs = shiftIDs.map(shiftID => ({
         id: shiftID,
@@ -313,12 +310,7 @@ async function updateShiftAndCheckAssignments(
 }
 
 //remove the shift from its reoccurring template and make new one (for changes to a single shift date)
-async function createNumberedSingleShiftOccurrence(
-    shiftID,
-    selectedDate,
-    startTime,
-    endTime
-) {
+async function createNumberedSingleShiftOccurrence(shiftID, selectedDate, startTime, endTime) {
     const originalShiftRef = doc(db, "shifts", shiftID);
 
     const [
@@ -905,12 +897,7 @@ async function deleteShiftAndAssignments(shiftID, selectedDate, scope = "single"
     }
 }
 
-export async function handleShiftEditSubmit({
-    startTime,
-    endTime,
-    startDate,
-    endDate
-}) {
+export async function handleShiftEditSubmit({startTime, endTime, startDate, endDate}) {
     if (!editingShiftID) {
         return false;
     }
