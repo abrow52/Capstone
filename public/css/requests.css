@@ -106,7 +106,12 @@
 #exitShiftManagement, 
 #exitScheduleMode, 
 #saveScheduleBtn, 
-#GenerateButton {
+#GenerateButton,
+#showCompose,
+.btn.btn-primary,
+.btn.btn-success.me-2,
+.btn.btn-secondary,
+.btn.btn-success {
     border-radius: 8px;
     padding: 9px 8px;
     background: #f1f1f1;
@@ -126,7 +131,12 @@
 #exitShiftManagement:hover, 
 #exitScheduleMode:hover,
 #saveScheduleBtn:hover,
-#GenerateButton:hover{
+#GenerateButton:hover,
+#showCompose:hover,
+.btn.btn-primary:hover,
+.btn.btn-success.me-2:hover,
+.btn.btn-secondary:hover,
+.btn.btn-success:hover{
     background-color: #2196F3; 
     color: white; 
 }
