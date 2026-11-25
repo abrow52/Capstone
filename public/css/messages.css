@@ -35,6 +35,10 @@
   background: none;
   font-size: 22px;
   cursor: pointer;
+  h2:hover{
+    text-decoration: underline;
+    cursor: pointer;
+  }
 }
 
 #showCompose {
@@ -116,4 +120,8 @@ h5{
       max-height: 90vh;
       padding: 15px;
   }
+}
+
+.open-button:hover {
+    text-decoration: underline;
 }

@@ -1,5 +1,5 @@
 header {
-    box-shadow: 0px 2px rgb(74, 73, 73);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
 }
 
 body {
@@ -9,8 +9,9 @@ body {
     color: black;
     overflow-x: hidden;
     overflow-y: auto;
-    font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-family: 'Playfair Display', 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font-weight: 100;
+    background-color: white;
 }
 
 .navbar {
@@ -20,11 +21,20 @@ body {
 
 #navItems {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     list-style: none;
     gap: 25px;
     margin: 0;
     padding: 0;
+    font-color: black; 
+    a:hover{
+        text-decoration: underline;
+    }
+}
+
+.nav-link:hover {
+    text-decoration: underline;
 }
 
 #home {
@@ -43,6 +53,9 @@ body {
 
 .calendarBtns {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
     flex-direction: row;
     gap: 20px;
     min-width: 0;
@@ -70,7 +83,7 @@ body {
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 10px;
-    box-shadow: 0px 0px 10px 3px rgba(80, 78, 78, 0.25);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
     box-sizing: border-box;
 }
 
@@ -87,12 +100,12 @@ body {
     gap: 12px;
 }
 
-#createbtn button {
+#createbtn button{
     width: 100%;
     padding: 11px;
-    border: none;
+    border: 1px solid #c7dce8;
     border-radius: 6px;
-    background-color: #2c6e91;
+    background-color: #2196F3;
     color: white;
     font-size: 15px;
     cursor: pointer;
@@ -101,7 +114,9 @@ body {
 }
 
 #createbtn button:hover {
-    background-color: #20536e;
+    /* background-color: #20536e; */
+    background-color: #f1f1f1;
+    color: black; 
 }
 
 /* create shifts */
@@ -221,38 +236,40 @@ body {
     background-color: #333;
 }
 
-/* reqs and open shifts */
-.requests,
-.openShifts {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-#calendarPeriodButtons {
+.calendarPeriodButtons {
     display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-    align-items: end;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: fit-content;
+    height: fit-content;
+    background: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 5px;
+    gap: 4px;
 }
 
-.period-btn {
-    padding: 8px 18px;
-    border: 1px solid #ccc;
+.calendarPeriodButtons .period-btn {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    margin: 0;
+    padding: 3px 8px;
+    border: none;
     border-radius: 6px;
-    background-color: white;
-    color: #333;
+    background: transparent;
+    color: #555;
+    font-size: 18px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    box-shadow: none;
 }
 
-.period-btn:hover {
-    background-color: #eee;
-}
-
-.period-btn.active {
-    background-color: #333;
+.calendarPeriodButtons .period-btn.active {
+    background: #2196F3;
     color: white;
-    border-color: #333;
 }
 
 @media (max-width: 900px) {
@@ -285,4 +302,82 @@ body {
         gap: 10px;
         flex-wrap: wrap;
     }
+}
+.calendarViewToggle{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+  font-family: sans-serif;
+}
+
+.option-label {
+  cursor: pointer;
+  user-select: none;
+  font-weight: 500;
+  color: #333;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 15px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 0px;
+    bottom: 1.2px;
+    background: linear-gradient(to right, #eeeeee, #cccccc);
+    /* border: 2px solid #e0e0e0; */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(16px);
+  -ms-transform: translateX(16px);
+  transform: translateX(16px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }

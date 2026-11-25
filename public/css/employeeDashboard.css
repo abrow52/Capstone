@@ -152,3 +152,221 @@
         grid-column: 1 / -1;
     }
 }
+
+/* Availability form */
+#availabilityForm {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+/* Effective start date */
+#availabilityForm .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 8px;
+}
+
+#availabilityStartDate {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d5dbe1;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    box-shadow: none;
+}
+
+#availabilityStartDate:focus {
+    border-color: #2196F3;
+    box-shadow: 0 0 4px rgba(33, 150, 243, 0.25);
+    outline: none;
+}
+
+#availabilityForm .text-muted {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #777 !important;
+}
+
+/* Availability section */
+#availabilityDays {
+    width: 100%;
+    margin-top: 15px;
+}
+
+/* Individual weekday row */
+.availabilityDay {
+    display: grid;
+    grid-template-columns: 0.8fr 1fr 1fr;
+    align-items: end;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #e2e5e9;
+}
+
+/* Day checkbox and name */
+.availabilityDay > label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #444;
+    margin: 0;
+    padding-bottom: 9px;
+    cursor: pointer;
+}
+
+/* Checkbox color */
+.availabilityDay input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: #2196F3;
+    cursor: pointer;
+}
+
+/* Start and End containers */
+.availabilityDay > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Start and End labels */
+.availabilityDay > div label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin: 0;
+}
+
+/* Time inputs */
+.availabilityDay input[type="time"] {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #d5dbe1;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+    font-size: 14px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+/* Focused time inputs */
+.availabilityDay input[type="time"]:focus {
+    border-color: #2196F3;
+    box-shadow: 0 0 4px rgba(33, 150, 243, 0.25);
+}
+
+/* Disabled time inputs */
+.availabilityDay input[type="time"]:disabled {
+    background-color: #f3f4f6;
+    color: #999;
+    cursor: not-allowed;
+}
+
+/* Effective start date */
+#availabilityForm .form-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+}
+
+#availabilityStartDate {
+    border: 1px solid #d5dbe1;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    box-shadow: none;
+}
+
+#availabilityStartDate:focus {
+    border-color: #2196F3;
+    box-shadow: 0 0 4px rgba(33, 150, 243, 0.25);
+}
+
+/* Helper text */
+#availabilityForm .text-muted {
+    font-size: 12px;
+    color: #777 !important;
+}
+
+/* Employee section */
+#employeeDirectorySection {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Section heading */
+.employee-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #333;
+}
+
+/* Add employee form */
+#addUserForm {
+    max-width: 500px;
+    margin: 20px 0;
+}
+
+/* Form labels */
+#addUserForm .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 7px;
+}
+
+/* Form inputs */
+#addUserForm .form-control {
+    padding: 10px 12px;
+    border: 1px solid #d5dbe1;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: none;
+    color: #333;
+}
+
+/* Input focus */
+#addUserForm .form-control:focus {
+    border-color: #2196F3;
+    box-shadow: 0 0 4px rgba(33, 150, 243, 0.25);
+}
+
+/* Buttons */
+.employeeFormButtons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Button styling */
+#addEmployeeBtn,
+.employeeFormButtons button {
+    border-radius: 8px;
+    padding: 9px 14px;
+    border: 1px solid #ddd;
+    background: #f1f1f1;
+    color: black;
+    cursor: pointer;
+}
+
+/* Button hover */
+#addEmployeeBtn:hover,
+.employeeFormButtons button:hover {
+    background: #2196F3;
+    color: white;
+}

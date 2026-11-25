@@ -9,7 +9,7 @@
     border-radius: 8px;
     color: black;
     min-height: 150px;
-    box-shadow: 0px 0px 10px 4px rgb(80, 78, 78);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
 }
 
 .requests h5{
@@ -19,17 +19,12 @@
     flex-direction: row;
 }
 
-
-.shiftInfo{
-    display:flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-
-#reqFormBtn{
-    font-size: 16px;
-    margin-left: auto;
+.requestCard{
+    background-color: #f9fafb;
+    border: 1px solid #e2e5e9;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
 .request-card {
@@ -71,6 +66,226 @@
     flex-shrink: 0;
 }
 
+.requestDetails {
+    margin-bottom: 15px;
+}
+
+.requestDetails summary {
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 10px 0;
+    list-style: none;
+}
+
+.requestDetails summary:hover {
+    color: #666;
+}
+
+.requestDetails > div {
+    padding-top: 10px;
+}
+
+.requestDetails summary::-webkit-details-marker {
+    display: none;
+}
+
+#reqFormBtn {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 15px;
+    margin-left: auto;
+}
+
+#reqFormBtn button, 
+#reqDropShiftForm button,
+#reqTimeOffForm button, 
+#createNewShiftBtn, 
+#exitShiftManagement, 
+#exitScheduleMode, 
+#saveScheduleBtn, 
+#GenerateButton,
+#showCompose,
+.btn.btn-primary,
+.btn.btn-success.me-2,
+.btn.btn-secondary,
+.btn.btn-success {
+    border-radius: 8px;
+    padding: 9px 8px;
+    background: #f1f1f1;
+    border: 1px solid #ddd;
+    color: black;
+    cursor: pointer;
+}
+
+#reqTimeOffForm button {
+    margin-top: 15px;
+}
+
+#reqFormBtn button:hover, 
+#reqDropShiftForm button:hover,
+#reqTimeOffForm button:hover, 
+#createNewShiftBtn:hover, 
+#exitShiftManagement:hover, 
+#exitScheduleMode:hover,
+#saveScheduleBtn:hover,
+#GenerateButton:hover,
+#showCompose:hover,
+.btn.btn-primary:hover,
+.btn.btn-success.me-2:hover,
+.btn.btn-secondary:hover,
+.btn.btn-success:hover{
+    background-color: #2196F3; 
+    color: white; 
+}
+
+#reqTimeOffForm input,
+#reqTimeOffForm select {
+    width: 100%;
+    max-width: 300px;
+    padding: 5px 8px;
+    border: 1px solid #d5dbe1;
+    border-radius: 8px;
+    background-color: #ffffff;
+    font-size: 15px;
+    color: #333;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#reqTimeOffForm input:focus,
+#reqTimeOffForm select:focus {
+    border-color: #2196F3;
+    box-shadow: 0 0 4px rgba(33, 150, 243, 0.3);
+}
+
+#reqTimeOffForm label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    margin-top: 6px;
+    color: #444;
+}
+
+#reqTimeOffForm .row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+#reqTimeOffForm .row > div {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.calendarPeriodButtons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: fit-content;
+    height: fit-content;
+    background: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 5px;
+    gap: 4px;
+}
+
+.calendarPeriodButtons .period-btn {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    margin: 0;
+    padding: 3px 8px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #555;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.calendarPeriodButtons .period-btn.active {
+    background: #2196F3;
+    color: white;
+}
+
+#employeeAssignmentToggleContainer {
+    display: flex;
+    justify-content: flex-start;
+    margin: 10px 0;
+}
+
+#employeeAssignmentToggleContainer label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #444;
+    cursor: pointer;
+}
+
+/* Toggle container */
+.assignment-switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 21px;
+}
+
+/* Hide default checkbox */
+.assignment-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Toggle background */
+.assignment-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #ccc;
+    border-radius: 20px;
+    transition: 0.3s;
+}
+
+/* Toggle circle */
+.assignment-slider:before {
+    content: "";
+    position: absolute;
+    height: 15px;
+    width: 15px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+/* When checked */
+.assignment-switch input:checked + .assignment-slider {
+    background-color: #2196F3;
+}
+
+.assignment-switch input:checked + .assignment-slider:before {
+    transform: translateX(17px);
+}
+
+/* Keyboard focus */
+.assignment-switch input:focus-visible + .assignment-slider {
+    outline: 2px solid #2196F3;
+    outline-offset: 3px;
 #leaveTypeSelect{
     padding-bottom: 10px;
 }
